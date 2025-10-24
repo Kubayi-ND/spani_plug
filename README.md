@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+## Overview
 
-## Project info
+Spani Plug provides:
 
-**URL**: https://lovable.dev/projects/f0c17f43-c65b-4efc-8daa-2e1d24d4f05f
+- **Trust:** Ratings and reviews prevent scams.  
+- **Accessibility:** Free, mobile-first, low-data, multilingual (English, isiZulu, Afrikaans, Xhosa), color-blind friendly.  
+- **Reach:** Geolocation-based discovery increases customers for service providers.
 
-## How can I edit this code?
+The MVP focuses on:
 
-There are several ways of editing your application.
+- Service provider and customer profiles  
+- Provider discovery by skill and location  
+- Basic review system and ratings  
+- Multilingual support  
+- Offline/low-data optimization via PWA
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f0c17f43-c65b-4efc-8daa-2e1d24d4f05f) and start prompting.
+## Features
 
-Changes made via Lovable will be committed automatically to this repo.
+### Service Providers
 
-**Use your preferred IDE**
+- Profile management (name, photo, skills, location, rate)  
+- Skill listing and rate updates  
+- Geolocation (manual or GPS)  
+- Customer reviews  
+- Language toggle  
+- Offline access (PWA)  
+- Image compression  
+- Notifications (web push)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Customers
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Profile setup (name, contact, location)  
+- Provider search and discovery  
+- Distance display using geolocation  
+- Ratings & reviews  
+- Multilingual toggle  
+- Offline mode (cached searches)  
+- Lazy loading for media
 
-Follow these steps:
+### Admin
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- User management (view, edit, suspend accounts)  
+- Content moderation (photos, reviews)  
+- Analytics and insights  
+- PWA control  
+- Security and audit logs
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Tech Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+- **Frontend:** React, Tailwind CSS, PWA support  
+- **Backend:** Node.js, Express  
+- **Database & Auth:** Supabase (PostgreSQL, Storage, Auth)  
+- **Optional Integrations:** Twilio (SMS verification), LibreTranslate API (translation management)
+
+---
+
+## Installation
+
+### Clone the repository
+
+```bash
+git clone <repo-url>
+cd spani-plug
+npm install
 npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/f0c17f43-c65b-4efc-8daa-2e1d24d4f05f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

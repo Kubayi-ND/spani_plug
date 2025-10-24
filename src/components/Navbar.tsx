@@ -64,13 +64,6 @@ export const Navbar = () => {
             {user ? (
               <>
                 <Button
-                  variant="outline"
-                  onClick={() => navigate("/post-job")}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post Job
-                </Button>
-                <Button
                   variant="ghost"
                   onClick={() => navigate("/profile")}
                 >
@@ -128,14 +121,6 @@ export const Navbar = () => {
                 </Button>
                 {user ? (
                   <>
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate("/post-job")}
-                      className="justify-start"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Post Job
-                    </Button>
                     <Button
                       variant="ghost"
                       onClick={() => navigate("/profile")}
