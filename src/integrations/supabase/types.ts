@@ -14,7 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      jobs: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          client_id: string
+          created_at: string | null
+          description: string
+          id: string
+          images: string[] | null
+          location: string
+          skill_required: Database["public"]["Enums"]["skill_category"]
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          client_id: string
+          created_at?: string | null
+          description: string
+          id?: string
+          images?: string[] | null
+          location: string
+          skill_required: Database["public"]["Enums"]["skill_category"]
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          client_id?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          images?: string[] | null
+          location?: string
+          skill_required?: Database["public"]["Enums"]["skill_category"]
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          location: string | null
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      provider_profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_verified: boolean | null
+          rate_per_hour: number | null
+          rating: number | null
+          review_count: number | null
+          skill: Database["public"]["Enums"]["skill_category"]
+          updated_at: string | null
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          rate_per_hour?: number | null
+          rating?: number | null
+          review_count?: number | null
+          skill: Database["public"]["Enums"]["skill_category"]
+          updated_at?: string | null
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          rate_per_hour?: number | null
+          rating?: number | null
+          review_count?: number | null
+          skill?: Database["public"]["Enums"]["skill_category"]
+          updated_at?: string | null
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
+      review_comments: {
+        Row: {
+          comment: string
+          created_at: string | null
+          id: string
+          review_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          id?: string
+          review_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          id?: string
+          review_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_comments_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_like: boolean
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_like: boolean
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_like?: boolean
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_likes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          after_image_url: string | null
+          before_image_url: string | null
+          client_id: string
+          comment: string | null
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          provider_id: string
+          rating: number
+          service_request_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          client_id: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          provider_id: string
+          rating: number
+          service_request_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          client_id?: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          provider_id?: string
+          rating?: number
+          service_request_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_requests: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          description: string
+          id: string
+          media_urls: string[] | null
+          provider_id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          description: string
+          id?: string
+          media_urls?: string[] | null
+          provider_id: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          media_urls?: string[] | null
+          provider_id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +287,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      skill_category:
+        | "plumber"
+        | "electrician"
+        | "carpenter"
+        | "gardener"
+        | "cleaner"
+        | "painter"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +421,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      skill_category: [
+        "plumber",
+        "electrician",
+        "carpenter",
+        "gardener",
+        "cleaner",
+        "painter",
+        "other",
+      ],
+    },
   },
 } as const
