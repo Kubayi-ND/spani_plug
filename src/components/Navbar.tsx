@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, Users, Globe } from "lucide-react";
+import { Menu, User, Globe } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,7 +47,7 @@ export const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="container mx-auto px-4 py-3">
+      <div className=" px-32 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <button
@@ -55,7 +55,7 @@ export const Navbar = () => {
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
             <div className="p-2 bg-gradient-to-br from-primary to-[hsl(250_84%_54%)] rounded-lg">
-              <Users className="h-5 w-5 text-primary-foreground" />
+              <User className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="font-bold text-xl text-foreground hidden sm:inline">
               Spani Plug
@@ -76,23 +76,22 @@ export const Navbar = () => {
             {/* Profile & Language Dropdown */}
             {user ? (
               <div className="relative" ref={dropdownRef}>
-                <Button
-                  variant="ghost"
+                <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="flex flex-col items-center gap-1"
                 >
-                  <Users className="h-10 w-10" />
-                 
-                </Button>
+                  <User className="h-7 w-7" /> 
+                  
+                </button>
 
                 {showDropdown && (
-                  <div className="absolute -right-6 w-48 bg-background border border-border rounded-md shadow-lg flex flex-col gap-2 z-50 p-1">
+                  <div className="absolute left-1/2 -translate-x-1/2 w-48 bg-background border border-border rounded-md shadow-lg flex flex-col gap-2 z-50 p-1">
                     <div className="flex justify-center w-full border-b border-grey-300 p-2">
-                        <span className="hidden sm:inline text-md font-semibold">
-                            {user.user_metadata?.full_name || "User"}
-                        </span>  
+                      <span className="hidden sm:inline text-md font-semibold">
+                        {user.user_metadata?.full_name || "User"}
+                      </span>
                     </div>
-                    
+
                     <Button
                       variant="ghost"
                       className="justify-start"
@@ -129,6 +128,7 @@ export const Navbar = () => {
                 <Button onClick={() => navigate("/signup")}>Sign Up</Button>
               </div>
             )}
+
 
           </div>
 
