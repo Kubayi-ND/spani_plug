@@ -24,7 +24,6 @@ export const ProviderCard = ({
   distance,
   rating,
   reviewCount,
-  rate,
   imageUrl,
 }: ProviderCardProps) => {
   const navigate = useNavigate();
@@ -67,8 +66,8 @@ export const ProviderCard = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-lg font-semibold text-foreground">{rate}</p>
+            <div className="flex items-center justify-end pt-2">
+            
               <Button onClick={() => navigate(`/provider/${id}`)}>
                 View Profile
               </Button>

@@ -7,7 +7,8 @@ import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import ProviderProfile from "./pages/ProviderProfile";
 import CustomerProfile from "./pages/CustomerProfile";
-import AdminDashboard from "./pages/AdminDashboard";
+import {AdminDashboard} from "./pages/Admin_page/AdminDashboard";
+import { AdminProvider } from './components/Admin_User/AdminContext';
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import PostJob from "./pages/PostJob";
@@ -27,7 +28,7 @@ const App = () => (
           <Route path="/discovery" element={<Discovery />} />
           <Route path="/provider/:id" element={<ProviderProfile />} />
           <Route path="/profile" element={<CustomerProfile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={  <AdminProvider> <AdminDashboard /> </AdminProvider>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/post-job" element={<PostJob />} />

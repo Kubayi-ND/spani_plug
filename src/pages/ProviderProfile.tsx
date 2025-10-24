@@ -92,9 +92,9 @@ const ProviderProfile = () => {
 
               <div className="text-center sm:text-right">
                 <Button size="lg" className="w-full sm:w-auto mb-2">
-                  Contact Provider
+                  Request Service
                 </Button>
-                <p className="text-2xl font-bold text-foreground">{provider.rate}</p>
+               
               </div>
             </div>
           </CardContent>
@@ -129,7 +129,7 @@ const ProviderProfile = () => {
         {/* Contact Details */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Contact Details</CardTitle>
+            <CardTitle>Area Coverage</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
@@ -139,13 +139,7 @@ const ProviderProfile = () => {
                 <p className="text-foreground">{provider.location}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <DollarSign className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Rate</p>
-                <p className="text-foreground">{provider.rate}</p>
-              </div>
-            </div>
+          
           </CardContent>
         </Card>
 
