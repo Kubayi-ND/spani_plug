@@ -9,7 +9,7 @@ interface ProviderCardProps {
   name: string;
   skill: string;
   location: string;
-  distance: string;
+  distance?: string; // ✅ made optional
   rating: number;
   reviewCount: number;
   rate: string;
@@ -56,14 +56,17 @@ export const ProviderCard = ({
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4" />
               <span>{location}</span>
-              <span className="text-muted-foreground">• {distance}</span>
+              {/* ✅ Only show distance if provided */}
+              {distance && <span className="text-muted-foreground">• {distance}</span>}
             </div>
 
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-[hsl(var(--rating))] text-[hsl(var(--rating))]" />
                 <span className="font-medium text-foreground">{rating}</span>
-                <span className="text-sm text-muted-foreground">({reviewCount} reviews)</span>
+                <span className="text-sm text-muted-foreground">
+                  ({reviewCount} reviews)
+                </span>
               </div>
             </div>
 
@@ -79,3 +82,4 @@ export const ProviderCard = ({
     </Card>
   );
 };
+
