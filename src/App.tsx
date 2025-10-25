@@ -15,6 +15,7 @@ import Signup from "./pages/Signup";
 import PostJob from "./pages/PostJob";
 import SocialFeed from "./pages/SocialFeed";
 import NotFound from "./pages/NotFound";
+import NotificationPage from "./pages/NotificationPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/social" element={<SocialFeed />} />
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

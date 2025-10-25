@@ -113,8 +113,12 @@ const ProviderProfile = () => {
               </div>
 
               <div className="text-center sm:text-right">
-                <Button size="lg" className="w-full sm:w-auto mb-2">
-                  Request Service
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto mb-2"
+                  onClick={() => navigate('/notifications')}
+                >
+                  Contact Provider
                 </Button>
                
               </div>
