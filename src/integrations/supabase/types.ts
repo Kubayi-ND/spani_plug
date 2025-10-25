@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_history: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          service_date: string
+          service_name: string
+          service_provider_name: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          service_date: string
+          service_name: string
+          service_provider_name: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          service_date?: string
+          service_name?: string
+          service_provider_name?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           budget_max: number | null
@@ -59,6 +86,39 @@ export type Database = {
         }
         Relationships: []
       }
+      posts: {
+        Row: {
+          created_at: string
+          description: string
+          dislikes_count: number
+          id: string
+          likes_count: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          dislikes_count?: number
+          id?: string
+          likes_count?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          dislikes_count?: number
+          id?: string
+          likes_count?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -92,6 +152,30 @@ export type Database = {
           phone?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      provider_history: {
+        Row: {
+          completed_jobs: number
+          id: string
+          pending_jobs: number
+          provider_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_jobs?: number
+          id?: string
+          pending_jobs?: number
+          provider_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_jobs?: number
+          id?: string
+          pending_jobs?: number
+          provider_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -276,6 +360,33 @@ export type Database = {
           status?: string | null
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      verification_documents: {
+        Row: {
+          certified_id: string
+          created_at: string
+          document_url: string | null
+          id: string
+          provider_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          certified_id: string
+          created_at?: string
+          document_url?: string | null
+          id?: string
+          provider_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          certified_id?: string
+          created_at?: string
+          document_url?: string | null
+          id?: string
+          provider_id?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
