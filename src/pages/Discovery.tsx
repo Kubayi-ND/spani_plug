@@ -1,15 +1,25 @@
 // src/pages/Discovery.tsx
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProviderCard } from "@/components/ProviderCard";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { motion, AnimatePresence } from "framer-motion";
 
-// ----------------------
-// Mock providers (inline for now)
-// Added Soweto-area providers so you can test locally
-// ----------------------
+/**
+ * Discovery page with debounced service suggestions.
+ * - Single search input (service)
+ * - Suggestions from platformServices appear after 1s debounce
+ * - Click suggestion to fill input
+ * - Search requires declared location (modal -> current location or add address)
+ * - Radius slider filters results; results sorted nearest->furthest
+ */
+
+/* platform service mock list */
+const platformServices = ["Plumber", "Electrician", "Carpenter", "Gardener", "Cleaner", "Painter"];
+
+/* mock providers (inline) */
 const mockProviders = [
   // Durban-area (original)
   {
@@ -36,13 +46,14 @@ const mockProviders = [
     imageUrl:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
   },
-  // Soweto-area providers (NEW)
+
+  // Soweto-area providers
   {
     id: "s1",
     name: "Kgosi Mokoena",
     skill: "Plumber",
     location: "Orlando, Soweto",
-    coords: { lat: -26.2445, lng: 27.8540 }, // Orlando area approx
+    coords: { lat: -26.2445, lng: 27.854 },
     rating: 4.7,
     reviewCount: 32,
     rate: "R220/hour",
@@ -54,7 +65,7 @@ const mockProviders = [
     name: "Zinhle Mthethwa",
     skill: "Electrician",
     location: "Jabulani, Soweto",
-    coords: { lat: -26.2455, lng: 27.8595 }, // Jabulani area approx
+    coords: { lat: -26.2455, lng: 27.8595 },
     rating: 4.9,
     reviewCount: 48,
     rate: "R280/hour",
@@ -66,14 +77,15 @@ const mockProviders = [
     name: "Siphiwe Ramotsoela",
     skill: "Carpenter",
     location: "Meadowlands, Soweto",
-    coords: { lat: -26.2650, lng: 27.8420 }, // Meadowlands area approx
+    coords: { lat: -26.265, lng: 27.842 },
     rating: 4.6,
     reviewCount: 18,
     rate: "R190/hour",
     imageUrl:
       "https://images.unsplash.com/photo-1520201163981-1a9cb0a2d6a5?w=400&h=400&fit=crop",
   },
-  // A couple more general providers
+
+  // Durban-area (continued)
   {
     id: "3",
     name: "Sipho Dlamini",
@@ -122,13 +134,74 @@ const mockProviders = [
     imageUrl:
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
   },
+
+  // Braamfontein-area providers (NEW)
+  {
+    id: "b1",
+    name: "Tebogo Molefe",
+    skill: "Electrician",
+    location: "Braamfontein, Johannesburg",
+    coords: { lat: -26.1944, lng: 28.034 },
+    rating: 4.8,
+    reviewCount: 45,
+    rate: "R300/hour",
+    imageUrl:
+      "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=400&h=400&fit=crop",
+  },
+  {
+    id: "b2",
+    name: "Ayanda Ndlovu",
+    skill: "Cleaner",
+    location: "Braamfontein, Johannesburg",
+    coords: { lat: -26.1935, lng: 28.0335 },
+    rating: 4.9,
+    reviewCount: 56,
+    rate: "R130/hour",
+    imageUrl:
+      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop",
+  },
+  {
+    id: "b3",
+    name: "Sabelo Dube",
+    skill: "Painter",
+    location: "Braamfontein, Johannesburg",
+    coords: { lat: -26.195, lng: 28.035 },
+    rating: 4.7,
+    reviewCount: 28,
+    rate: "R200/hour",
+    imageUrl:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop",
+  },
+  {
+    id: "b4",
+    name: "Nokuthula Khosa",
+    skill: "Plumber",
+    location: "Braamfontein, Johannesburg",
+    coords: { lat: -26.1947, lng: 28.0362 },
+    rating: 4.6,
+    reviewCount: 33,
+    rate: "R250/hour",
+    imageUrl:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
+  },
+  {
+    id: "b5",
+    name: "Kagiso Radebe",
+    skill: "Gardener",
+    location: "Braamfontein, Johannesburg",
+    coords: { lat: -26.1928, lng: 28.0325 },
+    rating: 4.5,
+    reviewCount: 21,
+    rate: "R170/hour",
+    imageUrl:
+      "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop",
+  },
 ];
 
-// ----------------------
-// Haversine formula for distance in km
-// ----------------------
+
+/* haversine distance in km */
 const getDistanceKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
-  const R = 6371; // Earth radius km
+  const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLon = ((b.lng - a.lng) * Math.PI) / 180;
   const lat1 = (a.lat * Math.PI) / 180;
@@ -140,312 +213,341 @@ const getDistanceKm = (a: { lat: number; lng: number }, b: { lat: number; lng: n
   return R * c;
 };
 
-// ----------------------
-// Mock geocode for demo
-// Added Soweto-related keys and fallback set to Soweto
-// ----------------------
+/* mock geocode (Soweto + Durban) */
 const mockGeocode = (cityOrAddress: string) => {
   const map: Record<string, { lat: number; lng: number }> = {
-    // Durban-area
+    soweto: { lat: -26.2446, lng: 27.8580 },
+    orlando: { lat: -26.2445, lng: 27.8540 },
+    jabulani: { lat: -26.2455, lng: 27.8595 },
+    meadowlands: { lat: -26.2650, lng: 27.8420 },
     durban: { lat: -29.8587, lng: 31.0218 },
     umlazi: { lat: -30.005, lng: 30.907 },
     phoenix: { lat: -29.775, lng: 31.03 },
     pinetown: { lat: -29.865, lng: 30.879 },
     chatsworth: { lat: -29.875, lng: 30.94 },
     westville: { lat: -29.84, lng: 30.92 },
-
-    // Soweto-area (new)
-    soweto: { lat: -26.2446, lng: 27.8580 }, // general Soweto center
-    orlando: { lat: -26.2445, lng: 27.8540 },
-    jabulani: { lat: -26.2455, lng: 27.8595 },
-    meadowlands: { lat: -26.2650, lng: 27.8420 },
   };
-  const key = cityOrAddress.trim().toLowerCase();
-  // fallback to Soweto so testing for your location is easier
+  const key = (cityOrAddress || "").trim().toLowerCase();
   return map[key] || map["soweto"];
 };
 
-// ----------------------
-// Component
-// ----------------------
 export default function Discovery() {
-  // user typed service (e.g., "plumber")
+  // input & suggestion states
   const [serviceQuery, setServiceQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // declared location coords (either current or saved address)
+  // location + providers
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-
-  // providers currently shown (either filtered or default)
   const [providersToShow, setProvidersToShow] = useState(mockProviders);
 
   // UI states
-  const [showLocationPrompt, setShowLocationPrompt] = useState(false); // popup asking for location
-  const [showAddressForm, setShowAddressForm] = useState(false); // manual address form
-  const [locationError, setLocationError] = useState(""); // permission or other errors
-  const [notFound, setNotFound] = useState(false); // single "not found" message
-  const [radius, setRadius] = useState(2); // km
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+  const [radius, setRadius] = useState<number>(2);
 
-  // temp storage for pending service when we show prompt
+  // pending & last search
   const [pendingService, setPendingService] = useState<string | null>(null);
+  const [lastServiceSearched, setLastServiceSearched] = useState<string | null>(null);
 
-  // Perform the actual search given a service string and location coords
-  const performSearch = (service: string, coords: { lat: number; lng: number }) => {
-    const normalized = service.trim().toLowerCase();
-    if (!normalized) {
-      // if somehow empty, just show defaults
-      setNotFound(false);
-      setProvidersToShow(mockProviders);
+  // ref for suggestions blur handling
+  const suggestionsRef = useRef<HTMLDivElement | null>(null);
+  const debounceRef = useRef<number | null>(null);
+
+  /* helper: platform services matching typed characters */
+  const servicesMatchingTyped = (typed: string) => {
+    const t = (typed || "").trim().toLowerCase();
+    if (!t) return [];
+    return platformServices.filter((s) => s.toLowerCase().includes(t));
+  };
+
+  /* debounce suggestions: when user types, wait 1s then compute suggestions */
+  useEffect(() => {
+    // clear previous timeout
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+
+    if (!serviceQuery.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
 
-    // filter providers by service match (case-insensitive includes)
-    const matching = mockProviders.filter((p) =>
-      p.skill.toLowerCase().includes(normalized)
-    );
+    // set new debounce
+    debounceRef.current = window.setTimeout(() => {
+      const matched = servicesMatchingTyped(serviceQuery);
+      setSuggestions(matched);
+      setShowSuggestions(matched.length > 0);
+      debounceRef.current = null;
+    }, 1000); // 1 second debounce
 
-    if (matching.length === 0) {
-      // service not in system — show notFound box and default providers underneath
+    // cleanup on unmount
+    return () => {
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+    };
+  }, [serviceQuery]);
+
+  /* when clicking outside suggestions, hide them */
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
+
+  /* perform the search (same logic as before) */
+  const performSearch = (typedService: string, coords: { lat: number; lng: number }) => {
+    const matchingServices = servicesMatchingTyped(typedService);
+
+    if (matchingServices.length === 0) {
       setNotFound(true);
       setProvidersToShow(mockProviders);
+      setLastServiceSearched(typedService);
       return;
     }
 
-    // compute distance from declared location, filter by radius, sort nearest -> furthest
-    const nearby = matching
+    let matchingProviders = mockProviders.filter((p) =>
+      matchingServices.some((s) => s.toLowerCase() === p.skill.toLowerCase())
+    );
+
+    const nearby = matchingProviders
       .map((p) => {
         const distanceKm = getDistanceKm(coords, p.coords);
-        return {
-          ...p,
-          distanceKm,
-          distance: `${distanceKm.toFixed(1)} km away`,
-        };
+        return { ...p, distanceKm, distance: `${distanceKm.toFixed(1)} km away` };
       })
       .filter((p) => p.distanceKm <= radius)
       .sort((a, b) => a.distanceKm - b.distanceKm);
 
     if (nearby.length === 0) {
-      // service exists but none found within radius
       setNotFound(true);
-      setProvidersToShow(mockProviders); // still render defaults below message
+      setProvidersToShow(mockProviders);
     } else {
       setNotFound(false);
       setProvidersToShow(nearby);
     }
+
+    setLastServiceSearched(typedService);
   };
 
-  // Called when user clicks Search
+  /* Search click: show modal if no location, otherwise run search */
   const handleSearchClick = () => {
     const service = serviceQuery.trim();
     if (!service) {
-      setLocationError("Please enter the service you want (e.g. 'Plumber').");
+      setLocationError("Please enter the service you want (e.g., plumber).");
       return;
     }
-    // If location already declared, perform search immediately
+    setLocationError("");
+
     if (location) {
-      setLocationError("");
       performSearch(service, location);
       return;
     }
 
-    // If no location declared, ask user to declare location first
     setPendingService(service);
     setShowLocationPrompt(true);
-    setLocationError("");
   };
 
-  // User chose to use current location: request geolocation and proceed only on success
+  /* geolocation */
   const handleUseCurrentLocation = () => {
     setLocationError("");
-    // If browser doesn't support geolocation, show error
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser.");
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setLocation(coords);
         setShowLocationPrompt(false);
-        // If we had a pending service stored, search with it; otherwise use current input
         performSearch(pendingService ?? serviceQuery, coords);
         setPendingService(null);
       },
-      (err) => {
-        // Permission denied or other error -> do not run search
+      () => {
         setLocationError("Location access denied. Please add your address manually.");
-        // keep the prompt open so user can choose Add Address
+        // keep modal open so user can choose Add Address
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
-  // User chose to add address: show form
+  /* add-address */
   const handleChooseAddAddress = () => {
     setShowAddressForm(true);
     setShowLocationPrompt(false);
   };
 
-  // Save address from form -> mock-geocode -> perform search
   const handleSaveAddress = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Read values from the form fields
     const form = e.currentTarget;
     const street = (form.elements.namedItem("street") as HTMLInputElement)?.value || "";
     const city = (form.elements.namedItem("city") as HTMLInputElement)?.value || "";
     const postal = (form.elements.namedItem("postal") as HTMLInputElement)?.value || "";
-
     const full = `${street} ${city} ${postal}`.trim();
     if (!full) {
-      setLocationError("Please fill in address fields.");
+      setLocationError("Please fill in at least the city field.");
       return;
     }
-
-    // Mock geocode using city token (default fallback -> Soweto)
     const coords = mockGeocode(city || full);
     setLocation(coords);
     setShowAddressForm(false);
     setLocationError("");
-    // perform search with pendingService first, fallback to serviceQuery
     performSearch(pendingService ?? serviceQuery, coords);
     setPendingService(null);
   };
+
+  /* rerun search when radius changes if last search and location exist */
+  useEffect(() => {
+    if (lastServiceSearched && location) performSearch(lastServiceSearched, location);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radius]);
+
+  /* animation variants */
+  const overlayAnim = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } };
+  const panelAnim = { initial: { y: 8, opacity: 0 }, animate: { y: 0, opacity: 1 }, exit: { y: 8, opacity: 0 } };
+  const cardAnim = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 8 } };
+  const suggestionAnim = { initial: { opacity: 0, y: -6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -6 } };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
-        {/* --- Search row: single input where user types service --- */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <Input
-            placeholder="Search service... (e.g. plumber, electrician)"
-            value={serviceQuery}
-            onChange={(e) => setServiceQuery(e.target.value)}
-            className="w-full sm:w-2/3"
-          />
-          <Button onClick={handleSearchClick}>Search</Button>
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        {/* Search input + suggestions */}
+        <div className="relative max-w-3xl">
+          <div className="flex gap-3">
+            <Input
+              placeholder="Search service... (type to see suggestions)"
+              value={serviceQuery}
+              onChange={(e) => {
+                setServiceQuery(e.target.value);
+                // immediately hide suggestions until debounce completes
+                setShowSuggestions(false);
+              }}
+              onFocus={() => {
+                // if we already have suggestions computed, show them on focus
+                if (suggestions.length > 0) setShowSuggestions(true);
+              }}
+              className="flex-1"
+            />
+            <Button onClick={handleSearchClick}>Search</Button>
+          </div>
+
+          {/* Suggestions dropdown (debounced) */}
+          <div ref={suggestionsRef} className="absolute left-0 right-0 mt-2 z-40">
+            <AnimatePresence>
+              {showSuggestions && suggestions.length > 0 && (
+                <motion.ul
+                  key="suggestions"
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={suggestionAnim}
+                  className="bg-white border rounded-md shadow-lg overflow-hidden"
+                  style={{ listStyle: "none", margin: 0, padding: 0 }}
+                >
+                  {suggestions.map((s) => (
+                    <li
+                      key={s}
+                      onMouseDown={(e) => {
+                        // mouseDown used to prevent input blur before click handler
+                        e.preventDefault();
+                        setServiceQuery(s);
+                        setShowSuggestions(false);
+                      }}
+                      className="px-4 py-2 hover:bg-slate-50 cursor-pointer"
+                    >
+                      {s}
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* radius control */}
-        <div className="flex items-center gap-3 mt-3">
-          <label className="text-sm font-medium">Search radius:</label>
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={radius}
-            onChange={(e) => setRadius(Number(e.target.value))}
-            className="flex-1"
-          />
+        {/* Radius control */}
+        <div className="flex items-center gap-3 mt-3 max-w-3xl">
+          <label className="text-sm font-medium">Radius:</label>
+          <input type="range" min={1} max={10} value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="flex-1" />
           <div className="text-sm font-semibold">{radius} km</div>
         </div>
 
-        {/* single not found message box (only one used) */}
-        {notFound && (
-          <div className="my-6 max-w-2xl mx-auto border border-red-200 rounded-lg bg-red-50 p-4 text-center">
-            <h3 className="text-lg font-semibold text-red-700">
-              Sorry — no nearby providers matched your request.
-            </h3>
-            <p className="text-sm text-red-600 mt-2">
-              We couldn't find the service within {radius} km. Please browse service providers below.
-            </p>
-            <ul>
-              <li className="text-sm text-red-600 mt-2">Please Check the spelling above</li>
-              <li className="text-sm text-red-600 mt-2">Please make sure you have declared you address upon search</li>
-            </ul>
-          </div>
-        )}
+        {/* Not found message */}
+        <AnimatePresence>{notFound && (<motion.div key="notfound" variants={panelAnim} initial="initial" animate="animate" exit="exit" className="my-4 max-w-3xl mx-auto border border-rose-200 rounded-lg bg-rose-50 p-4 text-center"><h3 className="text-lg font-semibold text-rose-700">Sorry — no nearby providers matched your request.</h3><p className="text-sm text-rose-600 mt-2">We couldn't find the service within {radius} km. Default providers are shown below.</p></motion.div>)}</AnimatePresence>
 
-        {/* location error (permission / validation) */}
-        {locationError && (
-          <div className="my-4">
-            <Alert variant="destructive">
-              <AlertTitle>Location required</AlertTitle>
-              <AlertDescription>{locationError}</AlertDescription>
-            </Alert>
-          </div>
-        )}
+        {/* Location errors */}
+        <AnimatePresence>{locationError && (<motion.div key="locerr" variants={panelAnim} initial="initial" animate="animate" exit="exit"><Alert variant="destructive" className="mb-2"><AlertTitle>Location required</AlertTitle><AlertDescription>{locationError}</AlertDescription></Alert></motion.div>)}</AnimatePresence>
 
-        {/* POPUP: ask for location when user clicked Search with no declared location */}
-        {showLocationPrompt && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 ">
-            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-              <h3 className="text-lg font-semibold mb-2">We need your location</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                To find service providers near you we need a location. You can either allow
-                access to your current location or add an address manually. We won't proceed
-                without your location.
-              </p>
+        {/* Location prompt modal */}
+        <AnimatePresence>
+          {showLocationPrompt && (
+            <motion.div key="locOverlay" variants={overlayAnim} initial="initial" animate="animate" exit="exit" className="fixed inset-0 z-50 flex sm:items-end md:items-center justify-center bg-black/40 p-4 sm:mb-10" onClick={() => { setShowLocationPrompt(false); setPendingService(null); }}>
+              <motion.div key="locPanel" variants={panelAnim} initial="initial" animate="animate" exit="exit" transition={{ type: "spring", stiffness: 300, damping: 25 }} className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+                <h3 className="text-lg font-semibold mb-2">We need your location</h3>
+                <p className="text-sm text-muted-foreground mb-4">To find service providers near you we need a location. Allow access to your current location or add an address manually. We will not run the search without a saved location.</p>
 
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={handleUseCurrentLocation}>
-                  Use Current Location
-                </Button>
-                <Button onClick={handleChooseAddAddress}>Add Address</Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setShowLocationPrompt(false);
-                    setPendingService(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+                <div className="flex flex-wrap gap-3 justify-end">
+                  <Button variant="outline" onClick={handleUseCurrentLocation}>Use Current Location</Button>
+                  <Button onClick={handleChooseAddAddress}>Add Address</Button>
+                  <Button variant="ghost" onClick={() => { setShowLocationPrompt(false); setPendingService(null); }}>Cancel</Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Address form shown when user chose Add Address */}
-        {showAddressForm && (
-          <div className="mt-6 max-w-xl">
-            <form onSubmit={handleSaveAddress} className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Street address</label>
-                <Input name="street" placeholder="123 Main St" />
-              </div>
+        {/* Address form */}
+        <AnimatePresence>
+          {showAddressForm && (
+            <motion.div key="addrForm" variants={panelAnim} initial="initial" animate="animate" exit="exit" className="mt-4 max-w-xl">
+              <form onSubmit={handleSaveAddress} className="space-y-3 bg-white p-4 rounded shadow">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Street address</label>
+                  <Input name="street" placeholder="123 Main St" />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">City</label>
-                <Input name="city" placeholder="Soweto (or Orlando, Jabulani)" />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">City</label>
+                  <Input name="city" placeholder="Soweto (Orlando, Jabulani, Meadowlands)" />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Postal code</label>
-                <Input name="postal" placeholder="Postal code" />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Postal code</label>
+                  <Input name="postal" placeholder="Postal code" />
+                </div>
 
-              <div className="flex gap-3 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowAddressForm(false);
-                    setPendingService(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Save Address & Search</Button>
-              </div>
-            </form>
-          </div>
-        )}
+                <div className="flex gap-3 justify-end">
+                  <Button variant="outline" onClick={() => { setShowAddressForm(false); setPendingService(null); }}>Cancel</Button>
+                  <Button type="submit">Save Address & Search</Button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Provider results (default or filtered) */}
+        {/* Provider cards */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {providersToShow.map((p) => (
-            // ProviderCard will show distance if it's present in the object
-            <ProviderCard key={p.id} {...p} />
-          ))}
+          <AnimatePresence>
+            {providersToShow.map((p) => (
+              <motion.div key={p.id} layout initial="initial" animate="animate" exit="exit" variants={cardAnim} transition={{ duration: 0.14 }}>
+                <ProviderCard {...p} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
-        {/* If providersToShow is empty (unlikely because we fallback to defaults), show fallback message */}
-        {providersToShow.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No providers to show.</p>
-          </div>
-        )}
+        {/* fallback */}
+        {providersToShow.length === 0 && (<div className="text-center py-12"><p className="text-muted-foreground">No providers to show.</p></div>)}
       </div>
     </div>
   );
