@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import ProviderProfile from "./pages/ProviderProfile";
+import ProviderPortfolio from "./pages/ProviderPortfolio";
 import CustomerProfile from "./pages/CustomerProfile";
 import {AdminDashboard} from "./pages/Admin_page/AdminDashboard";
 import { AdminProvider } from './components/Admin_User/AdminContext';
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/discovery" element={<Discovery />} />
           <Route path="/provider/:id" element={<ProviderProfile />} />
+          <Route path="/provider/portfolio" element={<ProviderPortfolio />} />
           <Route path="/profile" element={<CustomerProfile />} />
           <Route path="/admin" element={  <AdminProvider> <AdminDashboard /> </AdminProvider>} />
           <Route path="/login" element={<Login />} />
