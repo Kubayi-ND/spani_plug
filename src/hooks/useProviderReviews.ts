@@ -9,7 +9,7 @@ export const useProviderReviews = (providerId: string) => {
         .from("reviews")
         .select(`
           *,
-          client:profiles!reviews_client_id_fkey(
+          profiles!reviews_client_id_fkey(
             full_name
           )
         `)
@@ -17,7 +17,11 @@ export const useProviderReviews = (providerId: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      return (data || []).map(review => ({
+        ...review,
+        client: Array.isArray(review.profiles) ? review.profiles[0] : review.profiles
+      }));
     },
     enabled: !!providerId,
   });

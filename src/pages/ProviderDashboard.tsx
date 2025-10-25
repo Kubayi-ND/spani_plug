@@ -134,7 +134,7 @@ const ProviderDashboard = () => {
           .from("provider_profiles")
           .upsert({
             user_id: user.id,
-            skill,
+            skill: skill as any,
             rate_per_hour: parseInt(ratePerHour),
             years_experience: yearsExperience ? parseInt(yearsExperience) : null,
           });

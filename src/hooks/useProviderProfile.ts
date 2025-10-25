@@ -27,7 +27,7 @@ export const useProviderProfile = (providerId?: string) => {
         .from("provider_profiles")
         .select(`
           *,
-          profile:profiles(
+          profiles!provider_profiles_user_id_fkey(
             full_name,
             bio,
             avatar_url,
@@ -39,7 +39,11 @@ export const useProviderProfile = (providerId?: string) => {
         .single();
 
       if (error) throw error;
-      return data as ProviderProfile;
+      
+      return {
+        ...data,
+        profile: Array.isArray(data.profiles) ? data.profiles[0] : data.profiles
+      } as unknown as ProviderProfile;
     },
     enabled: !!providerId,
   });
@@ -53,7 +57,7 @@ export const useProviderProfiles = (skillFilter?: string) => {
         .from("provider_profiles")
         .select(`
           *,
-          profile:profiles(
+          profiles!provider_profiles_user_id_fkey(
             full_name,
             bio,
             avatar_url,
@@ -64,13 +68,17 @@ export const useProviderProfiles = (skillFilter?: string) => {
         .order("rating", { ascending: false });
 
       if (skillFilter && skillFilter !== "all") {
-        query = query.eq("skill", skillFilter);
+        query = query.eq("skill", skillFilter as any);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as ProviderProfile[];
+      
+      return (data || []).map(item => ({
+        ...item,
+        profile: Array.isArray(item.profiles) ? item.profiles[0] : item.profiles
+      })) as unknown as ProviderProfile[];
     },
   });
 };
