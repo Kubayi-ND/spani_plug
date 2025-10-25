@@ -4,12 +4,25 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 const ProviderProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Mock provider data - in production, fetch based on id
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState({
+    rating: 0,
+    comment: "",
+    image: null as File | null,
+  });
+
+  // State for newly submitted reviews displayed below the card
+  const [submittedReviews, setSubmittedReviews] = useState<
+    { id: number; customerName: string; date: string; rating: number; comment: string; imageUrl: string | null }[]
+  >([]);
+
+  // Mock provider data
   const provider = {
     name: "Zanele Khumalo",
     skill: "Electrician",
@@ -30,6 +43,7 @@ const ProviderProfile = () => {
         date: "2025-10-12",
         rating: 5,
         comment: "Outstanding service! Very knowledgeable and professional.",
+        imageUrl: null,
       },
       {
         id: 2,
@@ -37,6 +51,7 @@ const ProviderProfile = () => {
         date: "2025-09-28",
         rating: 5,
         comment: "Fixed my electrical issues quickly and efficiently. Highly recommended!",
+        imageUrl: null,
       },
       {
         id: 3,
@@ -44,8 +59,15 @@ const ProviderProfile = () => {
         date: "2025-09-15",
         rating: 4,
         comment: "Great work, very reliable and punctual.",
+        imageUrl: null,
       },
     ],
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewReview({ ...newReview, image: e.target.files[0] });
+    }
   };
 
   return (
@@ -146,6 +168,102 @@ const ProviderProfile = () => {
                 <p className="text-foreground">{provider.rate}</p>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <Phone className="h-5 w-5 text-muted-foreground" />
+              <p className="text-foreground">{provider.phone}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Mail className="h-5 w-5 text-muted-foreground" />
+              <p className="text-foreground">{provider.email}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Standalone Write Review Card */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Write a Review</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowReviewForm(!showReviewForm)}
+              >
+                Write a Review
+              </Button>
+            </div>
+
+            {showReviewForm && (
+              <div className="mt-4 p-4 border rounded space-y-3 bg-background">
+                <h3 className="font-semibold text-lg">Your Review</h3>
+
+                {/* Star Rating */}
+                <div className="flex gap-1 justify-center">
+                  {[1,2,3,4,5].map((star) => (
+                   <Star
+  key={star}
+  className={`h-6 w-6 cursor-pointer transition-colors duration-150 stroke-black ${
+    star <= newReview.rating
+      ? "fill-[hsl(var(--rating))] text-[hsl(var(--rating))]"
+      : "fill-white text-muted"
+  }`}
+  onMouseEnter={() => setNewReview({ ...newReview, rating: star })}
+  onClick={() => setNewReview({ ...newReview, rating: star })}
+/>
+
+                  ))}
+                </div>
+
+                {/* Comment */}
+                <textarea
+                  className="w-full border p-2 rounded"
+                  rows={3}
+                  placeholder="Write your review here..."
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                />
+
+                {/* Image Upload */}
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageChange(e)}
+                  />
+                  {newReview.image && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Selected file: {newReview.image.name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit & Cancel */}
+                <div className="flex gap-2 justify-center mt-2">
+                  <Button
+                    onClick={() => {
+                      const review = {
+                        id: provider.reviews.length + submittedReviews.length + 1,
+                        customerName: "You",
+                        date: new Date().toISOString().split("T")[0],
+                        rating: newReview.rating,
+                        comment: newReview.comment,
+                        imageUrl: newReview.image ? URL.createObjectURL(newReview.image) : null,
+                      };
+
+                      setSubmittedReviews([...submittedReviews, review]);
+                      setNewReview({ rating: 0, comment: "", image: null });
+                      setShowReviewForm(false);
+                    }}
+                  >
+                    Submit
+                  </Button>
+                  <Button variant="ghost" onClick={() => setShowReviewForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -174,10 +292,53 @@ const ProviderProfile = () => {
                   ))}
                 </div>
                 <p className="text-muted-foreground">{review.comment}</p>
+                {review.imageUrl && (
+                  <img
+                    src={review.imageUrl}
+                    alt="Review attachment"
+                    className="mt-2 w-32 h-32 object-cover rounded"
+                  />
+                )}
               </div>
             ))}
           </CardContent>
         </Card>
+
+        {/* Newly Submitted Reviews - displayed below card */}
+        {submittedReviews.length > 0 && (
+          <div className="mt-4">
+            {submittedReviews.map((review) => (
+              <Card key={review.id} className="mb-4">
+                <CardContent>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-foreground">{review.customerName}</p>
+                    <p className="text-sm text-muted-foreground">{review.date}</p>
+                  </div>
+                  <div className="flex items-center gap-1 mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < review.rating
+                            ? "fill-[hsl(var(--rating))] text-[hsl(var(--rating))]"
+                            : "text-muted"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground">{review.comment}</p>
+                  {review.imageUrl && (
+                    <img
+                      src={review.imageUrl}
+                      alt="Review attachment"
+                      className="mt-2 w-32 h-32 object-cover rounded"
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
