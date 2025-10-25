@@ -152,37 +152,6 @@ const ProviderProfile = () => {
           </CardContent>
         </Card>
 
-        {/* Contact Details */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Area Coverage</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Location</p>
-                <p className="text-foreground">{provider.location}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <DollarSign className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Rate</p>
-                <p className="text-foreground">{provider.rate}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-muted-foreground" />
-              <p className="text-foreground">{provider.phone}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <p className="text-foreground">{provider.email}</p>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Standalone Write Review Card */}
         <Card className="mb-6">
           <CardHeader>
@@ -206,15 +175,15 @@ const ProviderProfile = () => {
                 <div className="flex gap-1 justify-center">
                   {[1,2,3,4,5].map((star) => (
                    <Star
-  key={star}
-  className={`h-6 w-6 cursor-pointer transition-colors duration-150 stroke-black ${
-    star <= newReview.rating
-      ? "fill-[hsl(var(--rating))] text-[hsl(var(--rating))]"
-      : "fill-white text-muted"
-  }`}
-  onMouseEnter={() => setNewReview({ ...newReview, rating: star })}
-  onClick={() => setNewReview({ ...newReview, rating: star })}
-/>
+                key={star}
+                className={`h-6 w-6 cursor-pointer transition-colors duration-150 stroke-black ${
+                  star <= newReview.rating
+                    ? "fill-[hsl(var(--rating))] text-[hsl(var(--rating))]"
+                    : "fill-white text-muted"
+                }`}
+                onMouseEnter={() => setNewReview({ ...newReview, rating: star })}
+                onClick={() => setNewReview({ ...newReview, rating: star })}
+              />
 
                   ))}
                 </div>
