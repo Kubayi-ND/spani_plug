@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import ProviderProfile from "./pages/ProviderProfile";
+import ProviderPortfolio from "./pages/ProviderPortfolio";
 import CustomerProfile from "./pages/CustomerProfile";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -14,6 +15,7 @@ import Signup from "./pages/Signup";
 import PostJob from "./pages/PostJob";
 import SocialFeed from "./pages/SocialFeed";
 import NotFound from "./pages/NotFound";
+import NotificationPage from "./pages/NotificationPage";
 
 const queryClient = new QueryClient();
 
@@ -29,11 +31,12 @@ const App = () => (
           <Route path="/provider/:id" element={<ProviderProfile />} />
           <Route path="/provider-dashboard" element={<ProviderDashboard />} />
           <Route path="/profile" element={<CustomerProfile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={  <AdminProvider> <AdminDashboard /> </AdminProvider>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/social" element={<SocialFeed />} />
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
