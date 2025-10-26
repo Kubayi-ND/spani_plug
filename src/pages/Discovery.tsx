@@ -16,7 +16,7 @@ const Discovery = () => {
       <div className="container mx-auto px-4 py-8">
         <SearchBar
           onSkillChange={setSelectedSkill}
-          selectedSkill={selectedSkill}
+          // selectedSkill={selectedSkill}
         />
 
         <div className="mt-8 grid gap-4 sm:gap-6">

@@ -1,96 +1,108 @@
+// SearchBar.tsx
 import { useState } from "react";
 import { Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { AddAddressModal } from "@/Models/AddAdressModel";
 
+// Props for communicating with parent (Discovery)
 interface SearchBarProps {
-  onSkillChange?: (skill: string) => void;
-  onLocationChange?: (location: string) => void;
-  selectedSkill?: string;
+  onSearch?: (query: string, location: { lat: number; lng: number } | null) => void;
+  onSkillChange?: (skill: string) => void; // optional filter update
 }
 
-export const SearchBar = ({ onSkillChange, onLocationChange, selectedSkill }: SearchBarProps) => {
+// Mock coordinates for demonstration (Durban)
+const mockCurrentLocation = { lat: -29.8587, lng: 31.0218 };
+
+export const SearchBar = ({ onSearch }: SearchBarProps) => {
+  // Local state for search query and location
   const [searchTerm, setSearchTerm] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  
-  const skills = [
-    "Plumber", "Electrician", "Carpenter", "Gardener", "Cleaner", "Painter"
-  ];
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
-  const filteredSuggestions = searchTerm
-    ? skills.filter(skill => 
-        skill.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    setShowSuggestions(true);
-    onSkillChange?.(value);
+  // When user clicks "Use My Location"
+  const handleUseCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+          setUserLocation(coords);
+          onSearch?.(searchTerm, coords);
+        },
+        () => {
+          // If permission denied, fall back to mock
+          setUserLocation(mockCurrentLocation);
+          onSearch?.(searchTerm, mockCurrentLocation);
+        }
+      );
+    } else {
+      // No geolocation support
+      setUserLocation(mockCurrentLocation);
+      onSearch?.(searchTerm, mockCurrentLocation);
+    }
   };
 
-  const selectSuggestion = (skill: string) => {
-    setSearchTerm(skill);
-    setShowSuggestions(false);
-    onSkillChange?.(skill.toLowerCase());
+  // When user submits the search
+  const handleSearch = () => {
+    if (!userLocation) {
+      // If no location yet, show modal
+      setShowAddressModal(true);
+    } else {
+      // Proceed to search
+      onSearch?.(searchTerm.toLowerCase(), userLocation);
+    }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-foreground">
+    <div className="w-full max-w-3xl mx-auto space-y-4">
+      {/* Header */}
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 text-foreground">
         Find Services Near You
       </h2>
-      
-      <div className="flex flex-col sm:flex-row gap-3">
+
+      {/* Unified Search Input */}
+      <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by skill..."
+            placeholder="Search service..."
             className="pl-10 h-12"
             value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          />
-          {showSuggestions && filteredSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
-              {filteredSuggestions.map((skill) => (
-                <div
-                  key={skill}
-                  className="px-4 py-2 hover:bg-accent cursor-pointer"
-                  onClick={() => selectSuggestion(skill)}
-                >
-                  {skill}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="relative flex-1">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by location..."
-            className="pl-10 h-12"
-            onChange={(e) => onLocationChange?.(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <Select value={selectedSkill} onValueChange={onSkillChange}>
-          <SelectTrigger className="w-full sm:w-[200px] h-12">
-            <SelectValue placeholder="All Skills" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Skills</SelectItem>
-            <SelectItem value="plumber">Plumber</SelectItem>
-            <SelectItem value="electrician">Electrician</SelectItem>
-            <SelectItem value="carpenter">Carpenter</SelectItem>
-            <SelectItem value="gardener">Gardener</SelectItem>
-            <SelectItem value="cleaner">Cleaner</SelectItem>
-            <SelectItem value="painter">Painter</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Search Button */}
+        <Button className="h-12" onClick={handleSearch}>
+          Search
+        </Button>
       </div>
+
+      {/* Location Buttons */}
+      {!userLocation && (
+        <div className="flex justify-center gap-4 mt-2">
+          <Button variant="outline" onClick={handleUseCurrentLocation}>
+            <MapPin className="mr-2 h-4 w-4" /> Use Current Location
+          </Button>
+          <Button variant="secondary" onClick={() => setShowAddressModal(true)}>
+            Add Address
+          </Button>
+        </div>
+      )}
+
+      {/* Address Modal for manual address input */}
+      <AddAddressModal
+        open={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        onSave={(coords) => {
+          setUserLocation(coords);
+          setShowAddressModal(false);
+          onSearch?.(searchTerm.toLowerCase(), coords);
+        }}
+      />
     </div>
   );
 };

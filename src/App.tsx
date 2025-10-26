@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { AdminProvider } from "./components/Admin_User/AdminContext";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,14 +7,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import ProviderProfile from "./pages/ProviderProfile";
+import ProviderPortfolio from "./pages/ProviderPortfolio";
 import CustomerProfile from "./pages/CustomerProfile";
-import ProviderDashboard from "./pages/ProviderDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import PostJob from "./pages/PostJob";
 import SocialFeed from "./pages/SocialFeed";
 import NotFound from "./pages/NotFound";
+import NotificationPage from "./pages/NotificationPage";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +29,20 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/discovery" element={<Discovery />} />
           <Route path="/provider/:id" element={<ProviderProfile />} />
-          <Route path="/provider-dashboard" element={<ProviderDashboard />} />
+          <Route path="/provider/portfolio" element={<ProviderPortfolio />} />
           <Route path="/profile" element={<CustomerProfile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={
+            <AdminProvider>
+              <AdminDashboard />
+            </AdminProvider>
+          } />
+          <Route path="/admin" element={  <AdminProvider> <AdminDashboard /> </AdminProvider>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/social" element={<SocialFeed />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/notifications" element={<NotificationPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
