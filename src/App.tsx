@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { AdminProvider } from "./components/Admin_User/AdminContext";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,7 +8,6 @@ import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import ProviderProfile from "./pages/ProviderProfile";
 import CustomerProfile from "./pages/CustomerProfile";
-import ProviderDashboard from "./pages/ProviderDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -27,9 +27,13 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/discovery" element={<Discovery />} />
           <Route path="/provider/:id" element={<ProviderProfile />} />
-          <Route path="/provider-dashboard" element={<ProviderDashboard />} />
           <Route path="/profile" element={<CustomerProfile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={
+            <AdminProvider>
+              <AdminDashboard />
+            </AdminProvider>
+          } />
+          <Route path="/admin" element={  <AdminProvider> <AdminDashboard /> </AdminProvider>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/post-job" element={<PostJob />} />
