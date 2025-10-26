@@ -7,19 +7,20 @@ import { Select } from '../ui/select';
 import { Label } from '../ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Search, Filter, MoreVertical, Mail, Ban, CheckCircle, Edit, Eye, X } from 'lucide-react';
-import { mockProviders, mockCustomers } from './mockdata/mockData';
+import { useAdminUsers } from '@/hooks/Admin/useAdminUsers';
 import { useAdmin } from './AdminContext';
 
 export function AdminUsers() {
   const { hasPermission } = useAdmin();
+  const { data: adminUsersData, isLoading: usersLoading } = useAdminUsers();
   const [searchTerm, setSearchTerm] = useState('');
   const [userType, setUserType] = useState<'all' | 'provider' | 'customer'>('all');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
 
   const allUsers = [
-    ...mockProviders.map(p => ({ ...p, type: 'provider' })),
-    ...mockCustomers.map(c => ({ ...c, type: 'customer' }))
+    ...(adminUsersData?.providers || []).map((p: any) => ({ ...p, type: 'provider' })),
+    ...(adminUsersData?.customers || []).map((c: any) => ({ ...c, type: 'customer' }))
   ];
 
   const filteredUsers = allUsers.filter(user => {

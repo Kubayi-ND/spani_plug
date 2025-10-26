@@ -1,37 +1,42 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Loader2, Briefcase } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Edit, Save, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
-import { useCustomerProfile, useCustomerHistory } from "@/hooks/useCustomerProfile";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCustomerProfile, useCustomerHistory, useUpdateCustomerProfile } from "@/hooks/useCustomerProfile";
 import { useMyJobs } from "@/hooks/useJobs";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/Admin/useAuth";
+import { toast } from "sonner";
 
 const CustomerProfile = () => {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user, loading } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    full_name: "",
+    bio: "",
+    location: "",
+    phone: "",
+  });
 
-  useEffect(() => {
-    checkUser();
-  }, []);
+  const { data: profile, isLoading: profileLoading } = useCustomerProfile(user?.id);
+  const { data: history, isLoading: historyLoading } = useCustomerHistory(user?.id);
+  const { data: jobs, isLoading: jobsLoading } = useMyJobs(user?.id);
+  const { mutate: updateProfile, isPending: isUpdating } = useUpdateCustomerProfile();
 
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    setUserId(user.id);
-  };
+  // Redirect if not authenticated
+  if (!loading && !user) {
+    navigate("/login");
+    return null;
+  }
 
-  const { data: profile, isLoading: profileLoading } = useCustomerProfile(userId || "");
-  const { data: history, isLoading: historyLoading } = useCustomerHistory(userId || "");
-  const { data: jobs, isLoading: jobsLoading } = useMyJobs(userId || "");
-
-  if (!userId || profileLoading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -75,52 +80,144 @@ const CustomerProfile = () => {
           <CardContent className="space-y-6">
             {/* Profile Header */}
             <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b">
-              <img
-                src={profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop"}
-                alt={profile?.full_name || "Customer"}
-                className="w-24 h-24 rounded-full object-cover"
-              />
+              <Avatar className="w-24 h-24">
+                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "Customer"} />
+                <AvatarFallback>{profile?.full_name?.charAt(0) || "C"}</AvatarFallback>
+              </Avatar>
               <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-foreground mb-1">
-                  {profile?.full_name || "Customer"}
-                </h2>
-                <p className="text-muted-foreground">{profile?.location || "Location not set"}</p>
+                {isEditing ? (
+                  <Input
+                    value={editForm.full_name}
+                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                    placeholder="Full Name"
+                    className="mb-2"
+                  />
+                ) : (
+                  <h2 className="text-2xl font-bold text-foreground mb-1">
+                    {profile?.full_name || "Customer"}
+                  </h2>
+                )}
+                {isEditing ? (
+                  <Input
+                    value={editForm.location}
+                    onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                    placeholder="Location"
+                    className="mb-2"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">{profile?.location || "Location not set"}</p>
+                )}
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>Member Since {new Date(profile?.created_at || "").toLocaleDateString()}</span>
                 </div>
               </div>
+              {!isEditing && (
+                <Button variant="outline" size="sm" onClick={() => {
+                  setIsEditing(true);
+                  setEditForm({
+                    full_name: profile?.full_name || "",
+                    bio: profile?.bio || "",
+                    location: profile?.location || "",
+                    phone: profile?.phone || "",
+                  });
+                }}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+              )}
             </div>
 
             {/* Contact Details */}
             <div>
               <h3 className="text-lg font-semibold mb-4 text-foreground">Contact Details</h3>
               <div className="space-y-4">
-                {profile?.phone && (
-                  <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-                    <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                      <p className="text-foreground">{profile.phone}</p>
-                    </div>
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+                  <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                    {isEditing ? (
+                      <Input
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                        placeholder="Phone Number"
+                      />
+                    ) : (
+                      <p className="text-foreground">{profile?.phone || "Not provided"}</p>
+                    )}
                   </div>
-                )}
+                </div>
 
-                {profile?.location && (
-                  <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-                    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Location</p>
-                      <p className="text-foreground">{profile.location}</p>
-                    </div>
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+                  <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Location</p>
+                    {isEditing ? (
+                      <Input
+                        value={editForm.location}
+                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                        placeholder="Location"
+                      />
+                    ) : (
+                      <p className="text-foreground">{profile?.location || "Not provided"}</p>
+                    )}
                   </div>
-                )}
+                </div>
+
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+                  <Edit className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Bio</p>
+                    {isEditing ? (
+                      <Textarea
+                        value={editForm.bio}
+                        onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                        placeholder="Tell us about yourself"
+                      />
+                    ) : (
+                      <p className="text-foreground">{profile?.bio || "No bio provided"}</p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <Button className="w-full" size="lg" onClick={() => navigate("/post-job")}>
-              Post a Job
-            </Button>
+            {isEditing ? (
+              <div className="flex gap-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsEditing(false)}
+                  disabled={isUpdating}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    updateProfile(
+                      { user_id: user?.id!, ...editForm },
+                      {
+                        onSuccess: () => {
+                          setIsEditing(false);
+                          toast.success("Profile updated successfully");
+                        },
+                        onError: (error) => {
+                          toast.error("Failed to update profile");
+                          console.error("Update error:", error);
+                        }
+                      }
+                    );
+                  }}
+                  disabled={isUpdating}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              </div>
+            ) : (
+              <Button className="w-full" size="lg" onClick={() => navigate("/post-job")}>
+                Post a Job
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -136,31 +233,67 @@ const CustomerProfile = () => {
             {jobsLoading ? (
               <div className="space-y-3">
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full" />
+                  <Skeleton key={i} className="h-[140px] w-full" />
                 ))}
               </div>
             ) : jobs && jobs.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid gap-4">
                 {jobs.slice(0, 5).map((job) => (
-                  <div key={job.id} className="p-4 border rounded-lg">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">{job.title}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="secondary">{job.skill_required}</Badge>
-                          <Badge variant="outline">{job.status}</Badge>
+                  <Card key={job.id} className="overflow-hidden">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <h4 className="font-semibold text-foreground truncate">{job.title}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary">{job.skill_required}</Badge>
+                            <Badge 
+                              variant={
+                                job.status === "open" ? "secondary" :
+                                job.status === "in_progress" ? "default" :
+                                job.status === "completed" ? "outline" :
+                                "outline"
+                              }
+                            >
+                              {job.status.replace("_", " ")}
+                            </Badge>
+                            {job.budget_max && (
+                              <Badge variant="outline">
+                                R{job.budget_min}-{job.budget_max}
+                              </Badge>
+                            )}
+                          </div>
+
+                          {job.created_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Posted {new Date(job.created_at).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      {job.budget_max && (
-                        <p className="text-sm font-medium text-foreground">R{job.budget_min}-{job.budget_max}</p>
-                      )}
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
+                {jobs.length > 5 && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate("/my-jobs")}
+                  >
+                    View All Jobs
+                  </Button>
+                )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No jobs posted yet</p>
+              <div className="text-center py-6">
+                <p className="text-muted-foreground mb-4">You haven't posted any jobs yet</p>
+                <Button onClick={() => navigate("/post-job")}>
+                  Post Your First Job
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -178,23 +311,32 @@ const CustomerProfile = () => {
                 ))}
               </div>
             ) : history && history.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid gap-3">
                 {history.map((item) => (
-                  <div key={item.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-foreground">{item.service_name}</p>
-                        <p className="text-sm text-muted-foreground">by {item.service_provider_name}</p>
+                  <Card key={item.id} className="overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-foreground">{item.service_name}</h4>
+                            <Badge variant="outline">
+                              {new Date(item.service_date).toLocaleDateString()}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">by {item.service_provider_name}</p>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(item.service_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No service history yet</p>
+              <div className="text-center py-6">
+                <p className="text-muted-foreground mb-4">You haven't used any services yet</p>
+                <Button variant="outline" onClick={() => navigate("/discovery")}>
+                  Browse Service Providers
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

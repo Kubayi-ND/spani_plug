@@ -38,15 +38,17 @@ const Discovery = () => {
             providers.map((provider) => (
               <ProviderCard
                 key={provider.id}
-                id={provider.id}
-                name={provider.profile?.full_name || "Unknown Provider"}
-                skill={provider.skill}
-                location={provider.profile?.location || "Location not set"}
-                distance="--" // Calculate distance in future
-                rating={provider.rating}
-                reviewCount={provider.review_count}
-                rate={`R${provider.rate_per_hour}/hour`}
-                imageUrl={provider.profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop"}
+                provider={{
+                  id: provider.id,
+                  business_name: provider.business_name,
+                  skill: provider.skill,
+                  location: provider.location || "Location not set",
+                  rating: provider.rating,
+                  review_count: provider.review_count,
+                  rate_per_hour: provider.rate_per_hour,
+                  avatar_url: provider.avatar_url,
+                  is_verified: provider.is_verified
+                }}
               />
             ))
           ) : (

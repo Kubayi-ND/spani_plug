@@ -1,68 +1,57 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, DollarSign, Phone, Mail } from "lucide-react";
+import { ArrowLeft, Star, MapPin, DollarSign, Phone, Mail, Globe, Briefcase, CheckCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
+import { useProviderProfile } from "@/hooks/useProviderProfile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 const ProviderProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { data: provider, isLoading } = useProviderProfile(id);
 
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [newReview, setNewReview] = useState({
+  interface Review {
+    rating: number;
+    comment: string;
+    image?: File;
+  }
+
+  interface SubmittedReview {
+    id: number;
+    customerName: string;
+    date: string;
+    rating: number;
+    comment: string;
+    imageUrl: string | null;
+  }
+
+  const [newReview, setNewReview] = useState<Review>({
     rating: 0,
     comment: "",
-    image: null as File | null,
   });
+  const [submittedReviews, setSubmittedReviews] = useState<SubmittedReview[]>([]);
 
-  // State for newly submitted reviews displayed below the card
-  const [submittedReviews, setSubmittedReviews] = useState<
-    { id: number; customerName: string; date: string; rating: number; comment: string; imageUrl: string | null }[]
-  >([]);
-
-  // Mock provider data
-  const provider = {
-    name: "Zanele Khumalo",
-    skill: "Electrician",
-    location: "Umlazi",
-    distance: "5.7km away",
-    rating: 4.9,
-    reviewCount: 38,
-    rate: "R300/hour",
-    imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    about: "Certified electrician providing safe and reliable electrical services. Available for emergencies 24/7.",
-    skills: ["Electrician", "Wiring", "Installations", "Emergency Repairs"],
-    email: "zanele.khumalo@example.com",
-    phone: "+27 82 456 7890",
-    reviews: [
-      {
-        id: 1,
-        customerName: "Michael Brown",
-        date: "2025-10-12",
-        rating: 5,
-        comment: "Outstanding service! Very knowledgeable and professional.",
-        imageUrl: null,
-      },
-      {
-        id: 2,
-        customerName: "Sarah Johnson",
-        date: "2025-09-28",
-        rating: 5,
-        comment: "Fixed my electrical issues quickly and efficiently. Highly recommended!",
-        imageUrl: null,
-      },
-      {
-        id: 3,
-        customerName: "David Williams",
-        date: "2025-09-15",
-        rating: 4,
-        comment: "Great work, very reliable and punctual.",
-        imageUrl: null,
-      },
-    ],
-  };
+  if (isLoading || !provider) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 w-24 bg-muted rounded"></div>
+            <div className="h-64 bg-muted rounded"></div>
+            <div className="h-40 bg-muted rounded"></div>
+            <div className="h-40 bg-muted rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -88,35 +77,41 @@ const ProviderProfile = () => {
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-6">
-              <img
-                src={provider.imageUrl}
-                alt={provider.name}
-                className="w-32 h-32 rounded-full object-cover mx-auto sm:mx-0"
-              />
+              <Avatar className="w-32 h-32 mx-auto sm:mx-0">
+                <AvatarImage src={provider.avatar_url || undefined} />
+                <AvatarFallback>{provider.business_name.charAt(0)}</AvatarFallback>
+              </Avatar>
               
               <div className="flex-1 text-center sm:text-left">
                 <h1 className="text-3xl font-bold mb-2 text-foreground">
-                  {provider.name}
+                  {provider.business_name}
                 </h1>
                 <Badge className="mb-3">{provider.skill}</Badge>
                 
                 <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 text-muted-foreground">
                   <Star className="h-4 w-4 fill-[hsl(var(--rating))] text-[hsl(var(--rating))]" />
                   <span className="font-semibold text-foreground">{provider.rating}</span>
-                  <span>({provider.reviewCount} reviews)</span>
+                  <span>({provider.review_count} reviews)</span>
                 </div>
 
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-muted-foreground">
                   <MapPin className="h-4 w-4" />
-                  <span>{provider.distance}</span>
+                  <span>{provider.location || "Location not specified"}</span>
                 </div>
+
+                {provider.is_verified && (
+                  <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-green-500">Verified Provider</span>
+                  </div>
+                )}
               </div>
 
               <div className="text-center sm:text-right">
                 <Button size="lg" className="w-full sm:w-auto mb-2">
                   Contact Provider
                 </Button>
-                <p className="text-2xl font-bold text-foreground">{provider.rate}</p>
+                <p className="text-2xl font-bold text-foreground">R{provider.rate_per_hour}/hour</p>
               </div>
             </div>
           </CardContent>
@@ -128,23 +123,16 @@ const ProviderProfile = () => {
             <CardTitle>About</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">{provider.about}</p>
-          </CardContent>
-        </Card>
-
-        {/* Skills Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Skills</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {provider.skills.map((skill) => (
-                <Badge key={skill} variant="secondary">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
+            <p className="text-muted-foreground">{provider.bio || "No bio provided"}</p>
+            
+            {provider.years_experience && (
+              <div className="mt-4 flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  {provider.years_experience} years of experience
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -158,24 +146,48 @@ const ProviderProfile = () => {
               <MapPin className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Location</p>
-                <p className="text-foreground">{provider.location}</p>
+                <p className="text-foreground">{provider.location || "Location not specified"}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <DollarSign className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Rate</p>
-                <p className="text-foreground">{provider.rate}</p>
+                <p className="text-sm font-medium text-muted-foreground">Rate per Hour</p>
+                <p className="text-foreground">R{provider.rate_per_hour}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-muted-foreground" />
-              <p className="text-foreground">{provider.phone}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <p className="text-foreground">{provider.email}</p>
-            </div>
+            {provider.phone && (
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-muted-foreground" />
+                <p className="text-foreground">{provider.phone}</p>
+              </div>
+            )}
+            {provider.website && (
+              <div className="flex items-center gap-3">
+                <Globe className="h-5 w-5 text-muted-foreground" />
+                <p className="text-foreground">{provider.website}</p>
+              </div>
+            )}
+            {provider.social_links && Object.entries(provider.social_links).length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium text-muted-foreground">Social Links</p>
+                <div className="flex gap-4">
+                  {Object.entries(provider.social_links).map(([platform, url]) => (
+                    url && (
+                      <a 
+                        key={platform}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-foreground hover:text-primary transition-colors"
+                      >
+                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                      </a>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -276,8 +288,16 @@ const ProviderProfile = () => {
             {provider.reviews.map((review) => (
               <div key={review.id} className="pb-4 border-b last:border-0 last:pb-0">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="font-semibold text-foreground">{review.customerName}</p>
-                  <p className="text-sm text-muted-foreground">{review.date}</p>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={review.profiles.avatar_url || undefined} />
+                      <AvatarFallback>{review.profiles.full_name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <p className="font-semibold text-foreground">{review.profiles.full_name}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1 mb-2">
                   {[...Array(5)].map((_, i) => (
@@ -292,13 +312,6 @@ const ProviderProfile = () => {
                   ))}
                 </div>
                 <p className="text-muted-foreground">{review.comment}</p>
-                {review.imageUrl && (
-                  <img
-                    src={review.imageUrl}
-                    alt="Review attachment"
-                    className="mt-2 w-32 h-32 object-cover rounded"
-                  />
-                )}
               </div>
             ))}
           </CardContent>
