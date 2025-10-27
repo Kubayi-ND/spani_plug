@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Globe } from "lucide-react";
+import { Menu, User, Globe, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,7 +63,7 @@ export const Navbar = () => {
           </button>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
             <div className="flex gap-2">
               <Button className="text-lg" variant="ghost" onClick={() => navigate("/discovery")}>
                 Find Services
@@ -72,6 +72,18 @@ export const Navbar = () => {
                 Community
               </Button>
             </div>
+
+              {/* Notifications button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => navigate("/notifications")}
+                title="Notifications"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+              </Button>
 
             {/* Profile & Language Dropdown */}
             {user ? (
@@ -146,6 +158,10 @@ export const Navbar = () => {
                 </Button>
                 <Button variant="ghost" onClick={() => navigate("/social")} className="justify-start">
                   Community
+                </Button>
+                <Button variant="ghost" onClick={() => navigate("/notifications")} className="justify-start">
+                  <Bell className="h-4 w-4 mr-2" />
+                  Notifications
                 </Button>
                 {user ? (
                   <>
