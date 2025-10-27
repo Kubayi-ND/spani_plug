@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/Admin/useAuth";
 
 interface ProviderCardProps {
   provider: {
@@ -20,6 +21,7 @@ interface ProviderCardProps {
 
 export const ProviderCard = ({ provider }: ProviderCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { 
     id, 
     business_name, 
@@ -80,7 +82,13 @@ export const ProviderCard = ({ provider }: ProviderCardProps) => {
               <p className="text-lg font-semibold text-foreground">
                 R {rate_per_hour}/hr
               </p>
-              <Button onClick={() => navigate(`/provider/${id}`)}>
+              <Button onClick={() => {
+                if (!user) {
+                  navigate('/login');
+                  return;
+                }
+                navigate(`/provider/${id}`);
+              }}>
                 View Profile
               </Button>
             </div>

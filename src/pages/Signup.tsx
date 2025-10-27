@@ -6,18 +6,27 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [userRole, setUserRole] = useState<"customer" | "provider">();
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+  
+    // Ensure a role is selected
+    if (!userRole) {
+      toast.error("Please select an account type");
+      return;
+    }
+  
     setLoading(true);
-
+  
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -25,12 +34,13 @@ const Signup = () => {
         options: {
           data: {
             full_name: fullName,
+            role: userRole,
           },
         },
       });
-
+  
       if (error) throw error;
-
+  
       toast.success("Account created! Welcome to Spani Plug");
       navigate("/discovery");
     } catch (error: any) {
@@ -39,7 +49,6 @@ const Signup = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -81,6 +90,24 @@ const Signup = () => {
                 required
                 minLength={6}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Account Type</Label>
+              <RadioGroup
+                value={userRole}
+                onValueChange={(value: "customer" | "provider") => setUserRole(value)}
+                className="flex justify-around"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="customer" id="customer" />
+                  <Label htmlFor="customer">Customer</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="provider" id="provider" />
+                  <Label htmlFor="provider">Service Provider</Label>
+                </div>
+              </RadioGroup>
+
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Sign up"}

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useMemo, useEffect } from "react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 const NotificationPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,7 +16,15 @@ const NotificationPage = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   
-  const { notifications, isLoading, markAsRead, markAllAsRead, deleteNotification, deleteMultiple } = useNotifications();
+  const { 
+    notifications, 
+    isLoading, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification, 
+    deleteMultiple,
+    totalCount 
+  } = useNotifications();
 
   useEffect(() => {
     const channel = supabase
@@ -104,9 +113,17 @@ const NotificationPage = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => {
-                  deleteMultiple(selectedNotifications);
-                  setSelectedNotifications([]);
+                onClick={async () => {
+                  try {
+                    await deleteMultiple(selectedNotifications);
+                    setSelectedNotifications([]);
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to delete notifications",
+                      variant: "destructive",
+                    });
+                  }
                 }}
               >
                 Delete Selected ({selectedNotifications.length})
@@ -219,7 +236,17 @@ const NotificationPage = () => {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => deleteNotification(notification.id)}
+                          onClick={async () => {
+                            try {
+                              await deleteNotification(notification.id);
+                            } catch (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete notification",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
                           className="text-destructive"
                         >
                           Delete
