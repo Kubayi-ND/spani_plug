@@ -7,8 +7,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-accent/20">
-      <nav className="border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+        <div className=" mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-gradient-to-br from-primary to-[hsl(250_84%_54%)] rounded-lg">
               <Users className="h-5 w-5 text-primary-foreground" />
@@ -24,26 +24,43 @@ const Index = () => {
         </div>
       </nav>
 
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-[hsl(250_84%_54%)] bg-clip-text text-transparent">
-          Connect with Trusted Service Providers
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          South Africa's first free, mobile-first marketplace for skilled workers.
-          Find plumbers, electricians, cleaners, and more in your area.
-        </p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Button size="lg" onClick={() => navigate("/discovery")}>
-            Find Services
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => navigate("/signup")}>
-            Join as Provider
-          </Button>
+      <section className="relative flex flex-col justify-center  h-[70vh]  mx-auto mt-18 px-4 py-20 text-center bg-[url('./Hero.jpg')] bg-cover bg-center ">
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+
+        {/* Content */}
+        <div className="relative  z-10">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-[hsl(250_84%_54%)] bg-clip-text text-transparent">
+            Connect with Trusted Service Providers
+          </h1>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            South Africa's first formal marketplace for skilled and informal skills workers.
+            Find your next service provider with just one click.
+          </p>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Button size="lg" onClick={() => navigate("/discovery")}>
+              Find Services
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate("/signup")}>
+              Join as Provider
+            </Button>
+          </div>
         </div>
       </section>
 
+
       <section className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-8">
+        <div className="text-center p-6">
+            <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Ultimate Convenience</h3>
+            <p className="text-muted-foreground">
+              Spani Plug makes finding, hiring, and paying skilled workers effortless.  
+              No long calls or travel — just search, connect, and get the job done from your phone.
+            </p>
+        </div>
           <div className="text-center p-6">
             <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
               <Search className="h-8 w-8 text-primary" />
@@ -64,15 +81,7 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="text-center p-6">
-            <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
-              <Shield className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Post Jobs</h3>
-            <p className="text-muted-foreground">
-              Upload images and post jobs visible only to relevant service providers
-            </p>
-          </div>
+
         </div>
       </section>
 
