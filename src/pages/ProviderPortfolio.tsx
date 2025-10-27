@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProfileContent } from "./../components/Admin_User/portfolio/ProfileContent";
-import { NotificationsContent, notificationsData } from "./../components/Admin_User/portfolio/NotificationContent";
+import { NotificationsContent } from "./../components/Admin_User/portfolio/NotificationContent";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, Bell, ArrowLeft } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const ProviderPortfolio: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"profile" | "notifications">("profile");
+  const { notifications } = useNotifications();
 
-  const unreadCount = notificationsData.filter(n => n.unread).length;
+  const unreadCount = notifications.filter(n => n.status === "unread").length;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

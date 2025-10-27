@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useProviderProfile } from "@/hooks/useProviderProfile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 
 const ProviderProfile = () => {
   const { id } = useParams();
@@ -16,6 +17,7 @@ const ProviderProfile = () => {
   const { data: provider, isLoading } = useProviderProfile(id);
 
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
   interface Review {
     rating: number;
     comment: string;
@@ -60,7 +62,7 @@ const ProviderProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen mt-16 bg-background">
       <Navbar />
 
       <div className="container mx-auto px-4 py-6 max-w-4xl">
@@ -108,7 +110,11 @@ const ProviderProfile = () => {
               </div>
 
               <div className="text-center sm:text-right">
-                <Button size="lg" className="w-full sm:w-auto mb-2">
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto mb-2"
+                  onClick={() => setShowRequestDialog(true)}
+                >
                   Request Service
                 </Button>
                 <p className="text-2xl font-bold text-foreground">R{provider.rate_per_hour}/hour</p>
@@ -348,6 +354,13 @@ const ProviderProfile = () => {
           </div>
         )}
       </div>
+
+      <RequestServiceDialog
+        open={showRequestDialog}
+        onOpenChange={setShowRequestDialog}
+        providerId={id!}
+        providerName={provider.business_name}
+      />
     </div>
   );
 };
