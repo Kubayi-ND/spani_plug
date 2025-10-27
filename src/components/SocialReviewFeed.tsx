@@ -144,7 +144,7 @@ export const SocialReviewFeed = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-16">
       <h2 className="text-2xl font-bold">Community Reviews</h2>
       
       {reviews.map((review) => (

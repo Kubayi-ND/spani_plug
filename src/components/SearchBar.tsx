@@ -108,7 +108,7 @@ export const SearchBar = ({ onSkillChange }: SearchBarProps) => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-4">
+    <div className="w-full max-w-3xl mx-auto mt-16 space-y-4">
       <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 text-foreground">
         Find Services Near You
       </h2>

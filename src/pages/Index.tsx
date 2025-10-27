@@ -24,7 +24,7 @@ const Index = () => {
         </div>
       </nav>
 
-      <section className="relative flex flex-col justify-center  h-[70vh]  mx-auto mt-18 px-4 py-20 text-center bg-[url('./Hero.jpg')] bg-cover bg-center ">
+      <section className="relative flex flex-col justify-center h-[76vh] mx-auto mt-18 px-4 py-20 text-center bg-[url('./Hero.jpg')] bg-cover bg-center ">
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/60"></div>
 
@@ -49,7 +49,7 @@ const Index = () => {
       </section>
 
 
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 md:py-12">
         <div className="grid md:grid-cols-3 gap-8">
         <div className="text-center p-6">
             <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
