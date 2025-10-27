@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { AddAddressModal } from "@/Models/AddAdressModel";
 import { ProviderCard } from "@/components/ProviderCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -214,7 +215,7 @@ export const SearchBar = ({ onSkillChange }: SearchBarProps) => {
         Find Services Near You
       </h2>
 
-      <div className="flex items-center gap-3">
+      <div className="grid place-items-center md:flex md:items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -233,20 +234,23 @@ export const SearchBar = ({ onSkillChange }: SearchBarProps) => {
             }}
           />
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm">Radius</label>
-          <select
-            value={radiusKm}
-            onChange={(e) => setRadiusKm(parseInt(e.target.value, 10))}
-            className="h-12 rounded-md px-2"
-            title="Search radius in km"
-          >
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={n}>
-                {n} km
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center gap-4 w-72">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-sm">Radius</label>
+              <span className="text-sm font-medium">{radiusKm} km</span>
+            </div>
+            <div className="px-1">
+              <Slider
+                value={[radiusKm]}
+                onValueChange={(v: number[]) => setRadiusKm(v[0] ?? 1)}
+                min={1}
+                max={10}
+                step={1}
+                aria-label="Search radius in kilometers"
+              />
+            </div>
+          </div>
 
           <Button className="h-12" onClick={() => setShowResults(true)}>
             Search
@@ -260,6 +264,7 @@ export const SearchBar = ({ onSkillChange }: SearchBarProps) => {
           <div className="absolute inset-0 bg-black/30" onClick={() => setShowOptionsModal(false)} />
           <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md z-10">
             <h4 className="text-lg font-semibold mb-3">Location options</h4>
+            <p className="text-sm text-muted-foreground mb-4">We need location information to find nearby service providers.</p>
             <p className="text-sm text-muted-foreground mb-4">Choose how you'd like to provide your location.</p>
             <div className="flex flex-col gap-3">
               <Button variant="outline" onClick={handleUseCurrentLocation}>
