@@ -109,7 +109,7 @@ const ProviderProfile = () => {
 
               <div className="text-center sm:text-right">
                 <Button size="lg" className="w-full sm:w-auto mb-2">
-                  Contact Provider
+                  Request Service
                 </Button>
                 <p className="text-2xl font-bold text-foreground">R{provider.rate_per_hour}/hour</p>
               </div>
@@ -156,12 +156,7 @@ const ProviderProfile = () => {
                 <p className="text-foreground">R{provider.rate_per_hour}</p>
               </div>
             </div>
-            {provider.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-muted-foreground" />
-                <p className="text-foreground">{provider.phone}</p>
-              </div>
-            )}
+          
             {provider.website && (
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-muted-foreground" />
