@@ -28,22 +28,53 @@ const Signup = () => {
     setLoading(true);
   
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Create auth user
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
             role: userRole,
+            email_verified: true,
           },
         },
       });
   
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+      if (!user) throw new Error("Failed to create user");
+
+      // 2. Create profile record
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          user_id: user.id,
+          full_name: fullName,
+          avatar_url: null,
+          bio: null,
+        });
+
+      if (profileError) throw profileError;
+
+      // 3. If provider, create provider profile
+      if (userRole === "provider") {
+        const { error: providerError } = await supabase
+          .from("provider_profiles")
+          .insert({
+            user_id: user.id,
+            skill: "other", // Default skill, they can update later
+            rate_per_hour: null,
+            years_experience: null,
+            is_verified: false,
+          });
+
+        if (providerError) throw providerError;
+      }
   
       toast.success("Account created! Welcome to Spani Plug");
       navigate("/discovery");
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error(error.message || "Failed to create account");
     } finally {
       setLoading(false);

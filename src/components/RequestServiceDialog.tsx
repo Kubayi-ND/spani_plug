@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +22,12 @@ interface RequestServiceDialogProps {
   providerName: string;
 }
 
-export const RequestServiceDialog = ({ open, onOpenChange, providerId, providerName }: RequestServiceDialogProps) => {
+export const RequestServiceDialog = ({
+  open,
+  onOpenChange,
+  providerId,
+  providerName,
+}: RequestServiceDialogProps) => {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -23,7 +35,7 @@ export const RequestServiceDialog = ({ open, onOpenChange, providerId, providerN
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !description.trim()) {
       toast.error("Please fill in all fields");
       return;
@@ -32,31 +44,42 @@ export const RequestServiceDialog = ({ open, onOpenChange, providerId, providerN
     setIsSubmitting(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         toast.error("Please log in to request a service");
         navigate("/login");
         return;
       }
 
-      // Create service request
+      // ✅ Create service request with required fields
       const { data: serviceRequest, error: requestError } = await supabase
         .from("service_requests")
-        .insert({
-          client_id: user.id,
-          provider_id: providerId,
-          title,
-          description,
-          status: "pending"
-        })
-        .select()
+        .insert([
+          {
+            client_id: user.id,
+            provider_id: providerId,
+            title,
+            description,
+            status: "pending",
+            created_at: new Date().toISOString(), // ensures timestamp is included
+            media_urls: [],
+          },
+        ])
+        .select("id, client_id, provider_id, status, created_at")
         .single();
 
-      if (requestError) throw requestError;
+      if (requestError) {
+        console.error("Service request error:", requestError);
+        throw requestError;
+      }
+      
+      console.log("Service request created:", serviceRequest);
 
-      // Create notification for provider
-      const { error: notificationError } = await supabase
+      // ✅ Create notification for provider
+      const { data: notification, error: notificationError } = await supabase
         .from("notifications")
         .insert({
           user_id: providerId,
@@ -68,12 +91,22 @@ export const RequestServiceDialog = ({ open, onOpenChange, providerId, providerN
           related_type: "service_request",
           metadata: {
             client_id: user.id,
+            provider_id: providerId,
+            status: "pending",
+            created_at: serviceRequest.created_at,
             title,
-            description
-          }
-        });
+            description,
+          },
+        })
+        .select()
+        .single();
 
-      if (notificationError) throw notificationError;
+      if (notificationError) {
+        console.error("Notification error:", notificationError);
+        throw notificationError;
+      }
+
+      console.log("Notification created:", notification);
 
       toast.success("Service request sent successfully!");
       onOpenChange(false);
