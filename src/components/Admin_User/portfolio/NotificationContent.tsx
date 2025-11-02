@@ -4,11 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell } from "lucide-react";
+import { Bell, ExternalLink } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export const NotificationsContent: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -144,6 +146,19 @@ export const NotificationsContent: React.FC = () => {
               </div>
               <p className="text-sm text-muted-foreground mb-2">{n.message}</p>
               <div className="flex gap-2">
+                {n.related_type === "service_request" && n.related_id && (
+                  <Button 
+                    size="sm" 
+                    variant="default"
+                    onClick={() => {
+                      handleMarkAsRead(n.id);
+                      navigate("/provider-portfolio", { state: { openTab: "requests" } });
+                    }}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-2" />
+                    View Request
+                  </Button>
+                )}
                 {n.status === "unread" && (
                   <Button size="sm" variant="outline" onClick={() => handleMarkAsRead(n.id)}>
                     Mark as Read
