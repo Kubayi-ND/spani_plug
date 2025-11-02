@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X } from "lucide-react";
+import { jobPostSchema, validateImageFile } from "@/lib/validation";
 
 const PostJob = () => {
   const navigate = useNavigate();
@@ -26,7 +27,24 @@ const PostJob = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImages([...images, ...Array.from(e.target.files)]);
+      const files = Array.from(e.target.files);
+      
+      // Validate each file (SECURITY FIX)
+      for (const file of files) {
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+          toast.error(validation.error);
+          return;
+        }
+      }
+      
+      // Limit to 5 images total
+      if (images.length + files.length > 5) {
+        toast.error("Maximum 5 images allowed");
+        return;
+      }
+      
+      setImages([...images, ...files]);
     }
   };
 
@@ -36,6 +54,21 @@ const PostJob = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Input validation (SECURITY FIX)
+    const validation = jobPostSchema.safeParse({
+      title: formData.title,
+      description: formData.description,
+      location: formData.location,
+      budget_min: formData.budget_min ? parseInt(formData.budget_min) : undefined,
+      budget_max: formData.budget_max ? parseInt(formData.budget_max) : undefined,
+    });
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -44,9 +77,10 @@ const PostJob = () => {
 
       const imageUrls: string[] = [];
       
+      // Upload images to user's folder (SECURITY FIX: enforced by RLS)
       for (const image of images) {
         const fileExt = image.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('job-images')
@@ -54,21 +88,24 @@ const PostJob = () => {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
+        // Get signed URL with 1 year expiration (SECURITY FIX)
+        const { data: signedUrlData, error: urlError } = await supabase.storage
           .from('job-images')
-          .getPublicUrl(fileName);
+          .createSignedUrl(fileName, 31536000); // 1 year
 
-        imageUrls.push(publicUrl);
+        if (urlError) throw urlError;
+        
+        imageUrls.push(signedUrlData.signedUrl);
       }
 
       const { error } = await supabase.from('jobs').insert([{
         client_id: user.id,
-        title: formData.title,
-        description: formData.description,
+        title: validation.data.title,
+        description: validation.data.description,
         skill_required: formData.skill_required as any,
-        location: formData.location,
-        budget_min: parseInt(formData.budget_min),
-        budget_max: parseInt(formData.budget_max),
+        location: validation.data.location,
+        budget_min: validation.data.budget_min,
+        budget_max: validation.data.budget_max,
         images: imageUrls,
       }]);
 

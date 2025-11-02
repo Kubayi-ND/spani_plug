@@ -29,26 +29,36 @@ export interface AdminUser {
     moderateMedia: ['superadmin', 'admin', 'moderator'],
   };
   
-  export function AdminProvider({ children }: { children: React.ReactNode }) {
-    // Mock admin - in production this would come from authentication
-    const [currentAdmin, setCurrentAdmin] = useState<AdminUser>({
-      id: 'admin-1',
-      name: 'Admin User',
-      email: 'admin@marketplace.co.za',
-      role: 'superadmin',
-    });
-  
-    const hasPermission = (permission: keyof typeof PERMISSIONS): boolean => {
-      if (!currentAdmin) return false;
-      return PERMISSIONS[permission]?.includes(currentAdmin.role) || false;
+export function AdminProvider({ children }: { children: React.ReactNode }) {
+  // SECURITY FIX: Load admin from database, not hardcoded
+  const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
+
+  React.useEffect(() => {
+    // In production, this would fetch the actual admin user from the database
+    // based on the authenticated user's role in the user_roles table
+    // For now, this is a placeholder that should be implemented with proper auth
+    const loadAdmin = async () => {
+      // TODO: Implement proper admin loading from user_roles table
+      // This should check if the authenticated user has admin/superadmin role
+      // Example:
+      // const { data: { user } } = await supabase.auth.getUser();
+      // const { data: role } = await supabase.from('user_roles').select('role').eq('user_id', user?.id).single();
+      // if (role?.role in ['admin', 'superadmin']) { setCurrentAdmin(...) }
     };
-  
-    return (
-      <AdminContext.Provider value={{ currentAdmin, setCurrentAdmin, hasPermission }}>
-        {children}
-      </AdminContext.Provider>
-    );
-  }
+    loadAdmin();
+  }, []);
+
+  const hasPermission = (permission: keyof typeof PERMISSIONS): boolean => {
+    if (!currentAdmin) return false;
+    return PERMISSIONS[permission]?.includes(currentAdmin.role) || false;
+  };
+
+  return (
+    <AdminContext.Provider value={{ currentAdmin, setCurrentAdmin, hasPermission }}>
+      {children}
+    </AdminContext.Provider>
+  );
+}
   
   export function useAdmin() {
     const context = useContext(AdminContext);
