@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { serviceRequestSchema } from "@/lib/validation";
 
 interface RequestServiceDialogProps {
   open: boolean;
@@ -36,8 +37,10 @@ export const RequestServiceDialog = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim() || !description.trim()) {
-      toast.error("Please fill in all fields");
+    // Input validation (SECURITY FIX)
+    const validation = serviceRequestSchema.safeParse({ title, description });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
       return;
     }
 
@@ -54,59 +57,42 @@ export const RequestServiceDialog = ({
         return;
       }
 
-      // ✅ Create service request with required fields
+      // Create service request
       const { data: serviceRequest, error: requestError } = await supabase
         .from("service_requests")
         .insert([
           {
             client_id: user.id,
             provider_id: providerId,
-            title,
-            description,
+            title: validation.data.title,
+            description: validation.data.description,
             status: "pending",
-            created_at: new Date().toISOString(), // ensures timestamp is included
-            media_urls: [],
           },
         ])
-        .select("id, client_id, provider_id, status, created_at")
+        .select()
         .single();
 
       if (requestError) {
         console.error("Service request error:", requestError);
         throw requestError;
       }
-      
-      console.log("Service request created:", serviceRequest);
 
-      // ✅ Create notification for provider
-      const { data: notification, error: notificationError } = await supabase
-        .from("notifications")
-        .insert({
+      // Call edge function to create notification (SECURITY FIX)
+      const { error: notificationError } = await supabase.functions.invoke('create-notification', {
+        body: {
           user_id: providerId,
-          title: "New Service Request",
-          message: `You have a new service request from a customer: ${title}`,
-          type: "service_request",
-          status: "unread",
+          title: 'New Service Request',
+          message: `You have a new service request: ${validation.data.title}`,
+          type: 'service_request',
           related_id: serviceRequest.id,
-          related_type: "service_request",
-          metadata: {
-            client_id: user.id,
-            provider_id: providerId,
-            status: "pending",
-            created_at: serviceRequest.created_at,
-            title,
-            description,
-          },
-        })
-        .select()
-        .single();
+          related_type: 'service_request',
+        }
+      });
 
       if (notificationError) {
-        console.error("Notification error:", notificationError);
-        throw notificationError;
+        console.error('Notification error:', notificationError);
+        // Don't fail the entire request if notification fails
       }
-
-      console.log("Notification created:", notification);
 
       toast.success("Service request sent successfully!");
       onOpenChange(false);

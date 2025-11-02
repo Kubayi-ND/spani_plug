@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { signupSchema } from "@/lib/validation";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -24,20 +25,27 @@ const Signup = () => {
       toast.error("Please select an account type");
       return;
     }
+
+    // Validate input
+    const validation = signupSchema.safeParse({ email, password, fullName });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
   
     setLoading(true);
   
     try {
-      // 1. Create auth user
+      // 1. Create auth user (NO role in metadata - security fix)
+      const redirectUrl = `${window.location.origin}/discovery`;
       const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
-            role: userRole,
-            email_verified: true,
           },
+          emailRedirectTo: redirectUrl,
         },
       });
   
@@ -56,7 +64,17 @@ const Signup = () => {
 
       if (profileError) throw profileError;
 
-      // 3. If provider, create provider profile
+      // 3. Insert role into user_roles table (SECURITY FIX)
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({
+          user_id: user.id,
+          role: userRole,
+        });
+
+      if (roleError) throw roleError;
+
+      // 4. If provider, create provider profile
       if (userRole === "provider") {
         const { error: providerError } = await supabase
           .from("provider_profiles")
@@ -74,7 +92,6 @@ const Signup = () => {
       toast.success("Account created! Welcome to Spani Plug");
       navigate("/discovery");
     } catch (error: any) {
-      console.error("Signup error:", error);
       toast.error(error.message || "Failed to create account");
     } finally {
       setLoading(false);
