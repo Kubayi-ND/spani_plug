@@ -122,7 +122,7 @@ export const Navbar = () => {
                     </Button>
                     <Select value={language} onValueChange={(val) => setLanguage(val as any)}>
                       <SelectTrigger className="w-full h-9">
-                        <SelectValue />
+                        <SelectValue placeholder="Language" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="en">English</SelectItem>
@@ -186,7 +186,7 @@ export const Navbar = () => {
                 )}
                 <Select value={language} onValueChange={(val) => setLanguage(val as any)}>
                   <SelectTrigger className="w-full h-9">
-                    <SelectValue />
+                    <SelectValue placeholder="Language" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>
