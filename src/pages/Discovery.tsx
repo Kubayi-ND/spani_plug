@@ -4,10 +4,12 @@ import { SearchBar } from "@/components/SearchBar";
 import { ProviderCard } from "@/components/ProviderCard";
 import { useProviderProfiles } from "@/hooks/useProviderProfile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 const Discovery = () => {
   const [selectedSkill, setSelectedSkill] = useState<string>("all");
   const { data: providers, isLoading } = useProviderProfiles(selectedSkill);
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +56,7 @@ const Discovery = () => {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">
-                No service providers found. Try adjusting your filters.
+                {t('noProvidersFound')}
               </p>
             </div>
           )}

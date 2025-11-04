@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { signupSchema } from "@/lib/validation";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -101,13 +103,13 @@ const Signup = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Join Spani Plug</CardTitle>
-          <CardDescription>Create your account to get started</CardDescription>
+          <CardTitle className="text-2xl">{t('createAccount')}</CardTitle>
+          <CardDescription>{t('joinMarketplace')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{t('fullName')}</Label>
               <Input
                 id="fullName"
                 type="text"
@@ -118,7 +120,7 @@ const Signup = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -129,7 +131,7 @@ const Signup = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -140,7 +142,7 @@ const Signup = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Account Type</Label>
+              <Label>{t('selectRole')}</Label>
               <RadioGroup
                 value={userRole}
                 onValueChange={(value: "customer" | "provider") => setUserRole(value)}
@@ -148,22 +150,22 @@ const Signup = () => {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="customer" id="customer" />
-                  <Label htmlFor="customer">Customer</Label>
+                  <Label htmlFor="customer">{t('customer')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="provider" id="provider" />
-                  <Label htmlFor="provider">Service Provider</Label>
+                  <Label htmlFor="provider">{t('provider')}</Label>
                 </div>
               </RadioGroup>
 
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign up"}
+              {loading ? t('creatingAccount') : t('signup')}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+              {t('alreadyHaveAccount')}{" "}
               <Link to="/login" className="text-primary hover:underline">
-                Login
+                {t('login')}
               </Link>
             </p>
           </form>

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/Admin/useAuth";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 interface ProviderCardProps {
   provider: {
@@ -22,6 +23,7 @@ interface ProviderCardProps {
 export const ProviderCard = ({ provider }: ProviderCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { 
     id, 
     business_name, 
@@ -74,13 +76,13 @@ export const ProviderCard = ({ provider }: ProviderCardProps) => {
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-[hsl(var(--rating))] text-[hsl(var(--rating))]" />
                 <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
-                <span className="text-sm text-muted-foreground">({review_count} reviews)</span>
+                <span className="text-sm text-muted-foreground">({review_count} {t('reviews')})</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-2">
               <p className="text-lg font-semibold text-foreground">
-                R {rate_per_hour}/hr
+                R {rate_per_hour}{t('perHour')}
               </p>
               <Button onClick={() => {
                 if (!user) {
@@ -89,7 +91,7 @@ export const ProviderCard = ({ provider }: ProviderCardProps) => {
                 }
                 navigate(`/provider/${id}`);
               }}>
-                View Profile
+                {t('viewProfile')}
               </Button>
             </div>
           </div>

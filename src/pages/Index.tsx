@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Users, Search, MessageSquare, Shield } from "lucide-react";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-accent/20">
@@ -17,9 +19,9 @@ const Index = () => {
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={() => navigate("/login")}>
-              Login
+              {t('login')}
             </Button>
-            <Button onClick={() => navigate("/signup")}>Sign Up</Button>
+            <Button onClick={() => navigate("/signup")}>{t('signup')}</Button>
           </div>
         </div>
       </nav>
@@ -31,18 +33,17 @@ const Index = () => {
         {/* Content */}
         <div className="relative  z-10">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-[hsl(250_84%_54%)] bg-clip-text text-transparent">
-            Connect with Trusted Service Providers
+            {t('heroTitle')}
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            South Africa's first formal marketplace for skilled and informal skills workers.
-            Find your next service provider with just one click.
+            {t('heroSubtitle')}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Button size="lg" onClick={() => navigate("/discovery")}>
-              Find Services
+              {t('findServices')}
             </Button>
             <Button size="lg" variant="outline" onClick={() => navigate("/signup")}>
-              Join as Provider
+              {t('joinAsProvider')}
             </Button>
           </div>
         </div>
@@ -55,19 +56,18 @@ const Index = () => {
             <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
               <Shield className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Ultimate Convenience</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('ultimateConvenience')}</h3>
             <p className="text-muted-foreground">
-              Spani Plug makes finding, hiring, and paying skilled workers effortless.  
-              No long calls or travel — just search, connect, and get the job done from your phone.
+              {t('ultimateConvenienceDesc')}
             </p>
         </div>
           <div className="text-center p-6">
             <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
               <Search className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Easy Search</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('easySearch')}</h3>
             <p className="text-muted-foreground">
-              Find skilled workers by location and service type with autocomplete search
+              {t('easySearchDesc')}
             </p>
           </div>
           
@@ -75,9 +75,9 @@ const Index = () => {
             <div className="inline-flex p-3 bg-primary/10 rounded-full mb-4">
               <MessageSquare className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Social Reviews</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('socialReviews')}</h3>
             <p className="text-muted-foreground">
-              See before/after photos, like reviews, and join the community conversation
+              {t('socialReviewsDesc')}
             </p>
           </div>
           
@@ -87,12 +87,12 @@ const Index = () => {
 
       <section className="bg-primary/5 py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+          <h2 className="text-3xl font-bold mb-6">{t('readyToStart')}</h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of South Africans connecting with trusted service providers in their community
+            {t('readyToStartDesc')}
           </p>
           <Button size="lg" onClick={() => navigate("/discovery")}>
-            Explore Services
+            {t('exploreServices')}
           </Button>
         </div>
       </section>

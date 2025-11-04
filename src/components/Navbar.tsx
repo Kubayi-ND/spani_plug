@@ -6,9 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const { t, language, setLanguage } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -66,10 +68,10 @@ export const Navbar = () => {
             <div className="hidden md:flex items-center gap-4">
             <div className="flex gap-2">
               <Button className="text-lg" variant="ghost" onClick={() => navigate("/discovery")}>
-                Find Services
+                {t('findServices')}
               </Button>
               <Button className="text-lg" variant="ghost" onClick={() => navigate("/social")}>
-                Community
+                {t('community')}
               </Button>
             </div>
 
@@ -79,8 +81,8 @@ export const Navbar = () => {
                 size="icon"
                 className="relative"
                 onClick={() => navigate("/notifications")}
-                title="Notifications"
-                aria-label="Notifications"
+                title={t('notifications')}
+                aria-label={t('notifications')}
               >
                 <Bell className="h-5 w-5" />
               </Button>
@@ -109,16 +111,16 @@ export const Navbar = () => {
                       className="justify-start"
                       onClick={() => navigate("/profile")}
                     >
-                      Profile
+                      {t('profile')}
                     </Button>
                     <Button
                       variant="ghost"
                       className="justify-start"
                       onClick={handleLogout}
                     >
-                      Logout
+                      {t('logout')}
                     </Button>
-                    <Select defaultValue="en">
+                    <Select value={language} onValueChange={(val) => setLanguage(val as any)}>
                       <SelectTrigger className="w-full h-9">
                         <SelectValue />
                       </SelectTrigger>
@@ -135,9 +137,9 @@ export const Navbar = () => {
             ) : (
               <div className="flex gap-2">
                 <Button variant="ghost" onClick={() => navigate("/login")}>
-                  Login
+                  {t('login')}
                 </Button>
-                <Button onClick={() => navigate("/signup")}>Sign Up</Button>
+                <Button onClick={() => navigate("/signup")}>{t('signup')}</Button>
               </div>
             )}
 
@@ -154,35 +156,35 @@ export const Navbar = () => {
             <SheetContent>
               <div className="flex flex-col gap-4 mt-8">
                 <Button variant="ghost" onClick={() => navigate("/discovery")} className="justify-start">
-                  Find Services
+                  {t('findServices')}
                 </Button>
                 <Button variant="ghost" onClick={() => navigate("/social")} className="justify-start">
-                  Community
+                  {t('community')}
                 </Button>
                 <Button variant="ghost" onClick={() => navigate("/notifications")} className="justify-start">
                   <Bell className="h-4 w-4 mr-2" />
-                  Notifications
+                  {t('notifications')}
                 </Button>
                 {user ? (
                   <>
                     <Button variant="ghost" onClick={() => navigate("/profile")} className="justify-start">
-                      Profile
+                      {t('profile')}
                     </Button>
                     <Button variant="ghost" onClick={handleLogout} className="justify-start">
-                      Logout
+                      {t('logout')}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button variant="ghost" onClick={() => navigate("/login")} className="justify-start">
-                      Login
+                      {t('login')}
                     </Button>
                     <Button onClick={() => navigate("/signup")} className="justify-start">
-                      Sign Up
+                      {t('signup')}
                     </Button>
                   </>
                 )}
-                <Select defaultValue="en">
+                <Select value={language} onValueChange={(val) => setLanguage(val as any)}>
                   <SelectTrigger className="w-full h-9">
                     <SelectValue />
                   </SelectTrigger>

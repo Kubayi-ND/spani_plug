@@ -7,6 +7,7 @@ import { AddAddressModal } from "@/Models/AddAdressModel";
 import { ProviderCard } from "@/components/ProviderCard";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProviderProfile } from "@/hooks/useProviderProfile";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 interface SearchBarProps {
   onSkillChange?: (skill: string) => void;
@@ -15,6 +16,7 @@ interface SearchBarProps {
 const mockCurrentLocation = { lat: -29.8587, lng: 31.0218 };
 
 export const SearchBar = ({ onSkillChange }: SearchBarProps) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [radiusKm, setRadiusKm] = useState<number>(2); // 1..10 km
@@ -212,14 +214,14 @@ export const SearchBar = ({ onSkillChange }: SearchBarProps) => {
   return (
     <div className="w-full max-w-3xl mx-auto mt-16 space-y-4">
       <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 text-foreground">
-        Find Services Near You
+        {t('findServices')}
       </h2>
 
       <div className="grid place-items-center md:flex md:items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by skill or name..."
+            placeholder={t('searchSkill')}
             className="pl-10 h-12"
             value={searchTerm}
             onChange={(e) => {
